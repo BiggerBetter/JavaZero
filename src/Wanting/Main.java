@@ -1,10 +1,11 @@
 package Wanting;
 
+import Utils.Apple;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class Main {
@@ -28,39 +29,4 @@ public class Main {
 
     }
 
-    private static class Apple{
-        Integer ic;
-        Integer id;
-        String  Is;
-
-        public Apple(Integer ic, Integer id, String is) {
-            this.ic = ic;
-            this.id = id;
-            this.Is = is;
-        }
-
-        public Integer getIc() {
-            return ic;
-        }
-
-        public void setIc(Integer ic) {
-            this.ic = ic;
-        }
-
-        public Integer getId() {
-            return id;
-        }
-
-        public void setId(Integer id) {
-            this.id = id;
-        }
-
-        public String getIs() {
-            return Is;
-        }
-
-        public void setIs(String Is) {
-            this.Is = Is;
-        }
-    }
 }
