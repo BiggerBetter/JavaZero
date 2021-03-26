@@ -30,6 +30,6 @@ public class TryArray {
         //Character 是char的包装类，能自动拆包、打包
         Character character = out.charAt(0);
 
-        System.out.println(alist);
+        System.out.println("hh");
     }
 }
