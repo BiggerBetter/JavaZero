@@ -9,3 +9,4 @@ public class TryMath {
         System.out.println(Math.sqrt(9));
     }
 }
+
