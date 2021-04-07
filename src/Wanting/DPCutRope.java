@@ -1,7 +1,11 @@
 package Wanting;
 
 public class DPCutRope {
-    public int cutRope(int target) {
+    public static void main(String[] args) {
+        System.out.println(cutRope(12));
+
+    }
+    public static int cutRope(int target) {
         if (target < 2) {
             return 0;
         }
