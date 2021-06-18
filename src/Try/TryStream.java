@@ -1,4 +1,4 @@
-package Wanting;
+package Try;
 
 import java.util.stream.Stream;
 

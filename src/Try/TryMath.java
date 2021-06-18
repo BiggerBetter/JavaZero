@@ -1,4 +1,4 @@
-package Wanting;
+package Try;
 
 public class TryMath {
     public static void main(String[] args) {

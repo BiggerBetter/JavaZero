@@ -1,11 +1,11 @@
-package Wanting;
+package Try;
 
 import com.sun.xml.internal.ws.api.model.wsdl.WSDLOutput;
 import org.w3c.dom.ls.LSOutput;
 
 import java.math.BigDecimal;
 
-public class tryBigDecimal {
+public class TryBigDecimal {
     public static void main(String[] args) {
         BigDecimal b1 = new BigDecimal("123.45");
         BigDecimal b2 = new BigDecimal("456.67");
