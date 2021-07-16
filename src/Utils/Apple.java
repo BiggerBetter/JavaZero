@@ -10,6 +10,11 @@ public class Apple {
         this.id = id;
         this.Is = is;
     }
+    public Apple() {
+        this.ic = 1;
+        this.id = 1;
+        this.Is = "Str";
+    }
 
     public Integer getIc() {
         return ic;
