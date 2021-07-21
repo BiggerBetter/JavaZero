@@ -5,38 +5,39 @@ public class Apple {
     Integer id;
     String  Is;
 
-    public Apple(Integer ic, Integer id, String is) {
-        this.ic = ic;
-        this.id = id;
-        this.Is = is;
+    public Apple(Integer price, Integer number, String name) {
+        this.price = price;
+        this.number = number;
+        this.name = name;
     }
     public Apple() {
-        this.ic = 1;
-        this.id = 1;
-        this.Is = "Str";
+        this.price = 1;
+        this.number = 1;
+        this.name = "Mac";
     }
 
-    public Integer getIc() {
-        return ic;
+    @Override
+    public Apple clone() throws CloneNotSupportedException {
+        return (Apple) super.clone();
     }
 
-    public void setIc(Integer ic) {
-        this.ic = ic;
+    public Integer getPrice() {
+        return price;
+    }
+    public Integer getNumber() {
+        return number;
+    }
+    public String getName() {
+        return name;
     }
 
-    public Integer getId() {
-        return id;
+    public void setPrice(Integer price) {
+        this.price = price;
     }
-
-    public void setId(Integer id) {
-        this.id = id;
+    public void setNumber(Integer number) {
+        this.number = number;
     }
-
-    public String getIs() {
-        return Is;
-    }
-
-    public void setIs(String Is) {
-        this.Is = Is;
+    public void setName(String name) {
+        this.name = name;
     }
 }
