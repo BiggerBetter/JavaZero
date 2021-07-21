@@ -1,9 +1,9 @@
 package ToolClasses;
 
 public class Apple {
-    Integer ic;
-    Integer id;
-    String  Is;
+    Integer price;
+    Integer number;
+    String  name;
 
     public Apple(Integer price, Integer number, String name) {
         this.price = price;
@@ -19,16 +19,7 @@ public class Apple {
     @Override
     public Apple clone() throws CloneNotSupportedException {
         return (Apple) super.clone();
-    public Apple() {
-        this.ic = 1;
-        this.id = 1;
-        this.Is = "Apple";
     }
-
-    public Integer getIc() {
-        return ic;
-    }
-
     public Integer getPrice() {
         return price;
     }
