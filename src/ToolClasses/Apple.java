@@ -1,4 +1,4 @@
-package Utils;
+package ToolClasses;
 
 public class Apple {
     Integer ic;
@@ -19,6 +19,14 @@ public class Apple {
     @Override
     public Apple clone() throws CloneNotSupportedException {
         return (Apple) super.clone();
+    public Apple() {
+        this.ic = 1;
+        this.id = 1;
+        this.Is = "Apple";
+    }
+
+    public Integer getIc() {
+        return ic;
     }
 
     public Integer getPrice() {

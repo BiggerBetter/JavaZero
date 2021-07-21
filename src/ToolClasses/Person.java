@@ -1,4 +1,4 @@
-package Utils;
+package ToolClasses;
 
 public class Person {
     private String Name;
