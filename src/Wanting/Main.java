@@ -10,7 +10,7 @@ public class Main {
 //        BeanUtils
 
 
-        System.out.println(app1.getIs());
+        System.out.println(app1.getName());
     }
 
 

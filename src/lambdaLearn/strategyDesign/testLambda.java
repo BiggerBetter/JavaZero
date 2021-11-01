@@ -1,4 +1,4 @@
-package lambdaLearn.策略设计模式;
+package lambdaLearn.strategyDesign;
 
 import org.junit.Test;
 

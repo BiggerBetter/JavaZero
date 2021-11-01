@@ -1,4 +1,4 @@
-package lambdaLearn.策略设计模式;
+package lambdaLearn.strategyDesign;
 
 /**
  * 带泛型接口 

@@ -1,7 +1,7 @@
 package lambdaLearn;
 
 import org.junit.Test;
-import 策略设计模式.Employee;
+import lambdaLearn.strategyDesign.Employee;
 
 import java.util.*;
 import java.util.stream.Collectors;

@@ -1,4 +1,4 @@
-package lambdaLearn.策略设计模式;
+package lambdaLearn.strategyDesign;
 
 /**
  * 实现接口 按年龄过滤
