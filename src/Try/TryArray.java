@@ -33,3 +33,9 @@ public class TryArray {
         System.out.println("hh");
     }
 }
+
+/**
+ * C语言中的数组：
+ * double balance[5] = {1000.0, 2.0, 3.4, 7.0, 50.0};
+ *
+ */
