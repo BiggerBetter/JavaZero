@@ -8,9 +8,14 @@ public class TryArray {
     public static void main(String[] args) {
         //新建的两种方法：1
         int[] nums = new int []{1,2};
+        // 二维数组
+        int[][] nums21 = new int [][]{{1,2},{1,2}};
+
 
         //新建的两种方法：2
         int[] nums2 = {1,2};
+        // 二维数组
+        int[][] nums22 = {{1,2},{1,2}};
 
         //Java里面有字符串类型的数组。Java的数组有一点基本类型的味道
         String[] strArray = {"1","2"};
