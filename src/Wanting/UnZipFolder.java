@@ -19,7 +19,7 @@ public class UnZipFolder {
 
     public static void main(String[] args) throws Exception {
 
-        String target = "/Users/Jenius/Desktop/UEC2/";
+        String target = "/Users/Jenius/Desktop/new/";
         File sf = new File(target);
         if(sf.isDirectory()){
             folderList.add(sf.getPath());
@@ -28,9 +28,9 @@ public class UnZipFolder {
         }
 
         while (!folderList.isEmpty()) {
-            String tmpfolderPath = folderList.remove(0);
-            if (!"".equals(tmpfolderPath)) {
-                File file = new File(tmpfolderPath);
+            String tmpFolderPath = folderList.remove(0);
+            if (!"".equals(tmpFolderPath)) {
+                File file = new File(tmpFolderPath);
                 File[] files = file.listFiles();
                 assert files != null;
                 for (File f : files) {
@@ -40,7 +40,6 @@ public class UnZipFolder {
                         decompress(f.getPath());
                     }
                 }
-
             }
         }
         listAllFileDeleteBlank(target);
@@ -76,12 +75,6 @@ public class UnZipFolder {
             } else {
                 // 表示文件
                 File f = new File(dest + File.separator + entry.getName());
-                if (!f.exists()) {
-                    //String dirs = FileUtils.getParentPath(f);
-                    String dirs = f.getParent();
-                    File parentDir = new File(dirs);
-                    parentDir.mkdirs();//兼容已经存在的情况
-                }
                 f.createNewFile();
                 // 将压缩文件内容写入到这个文件中
                 InputStream inStream = zf.getInputStream(entry);
@@ -94,6 +87,8 @@ public class UnZipFolder {
                 inStream.close();
                 outStream.close();
             }
+            //delete unzipped file. PS: this delete doesnt influence outcome
+            deleteFile(file.getPath());
         }
     }
 
