@@ -75,6 +75,12 @@ public class UnZipFolder {
             } else {
                 // 表示文件
                 File f = new File(dest + File.separator + entry.getName());
+                if (!f.exists()) {
+                    // 为了兼容__macosx临时文件夹
+                    String dirs = f.getParent();
+                    File parentDir = new File(dirs);
+                    parentDir.mkdirs();
+                }
                 f.createNewFile();
                 // 将压缩文件内容写入到这个文件中
                 InputStream inStream = zf.getInputStream(entry);
