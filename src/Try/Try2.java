@@ -1,35 +1,83 @@
 package Try;
 
-import Utils.ListNode;
+import ToolClasses.Apple;
+import ToolClasses.AppleSon;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Try2 {
     public static void main(String[] args) {
-        //把一个对象赋值给另一个对象，那引用另一个对象的对象会怎么样
+//        List<Map<String, Double>> list = new ArrayList<>();
+//        f4(list);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                synchronized (this) {
+                    System.out.println("第1次获取锁，这个锁是：" + this);
+                    int index = 1;
+                    while (true) {
+                        synchronized (this) {
+                            System.out.println("第" + (++index) + "次获取锁，这个锁是：" + this);
+                        }
+                        if (index == 10) {
+                            break;
+                        }
+                    }
+                }
+            }
+        }).start();
+    }
+
+    public static void testApple(){
+        List<Map<String, ? super AppleSon>> list = new ArrayList<>();
+        a2(list);
+    }
 
 
-        ListNode head = new ListNode();head.setName("head");head.setValue(0);
-        head.setNext(null);
-        ListNode tail = new ListNode();tail.setName("tail");tail.setValue(-1);
-        head.next = tail;
-
-        ListNode newNode = new ListNode();newNode.setName("newNode");newNode.setValue(1);
-
-        tail.setValue(9);
-        tail.setName("changed tail");
-
-        ListNode lnTmp = new ListNode();
-        lnTmp.setName("new");
-        lnTmp.setValue(1);
-        tail.next  = lnTmp;
-
-        tail = lnTmp;
-
-
-        System.out.println(tail.getName());
+    public static void a(List<? extends Map<String, ?>> mapList) {
 
     }
 
+    public static void a1(List<Map<String, AppleSon>> mapList1) {
+
+    }
+
+    public static void a2(List<Map<String, ? super AppleSon>> mapList1) {
+        //可以接收List<Map<String, Double>>
+    }
+
+    public static void a3(List<Map<String, ?>> mapList1) {
+
+    }
+
+    public static void a4(List<? extends Map<String, ?>> mapList1) {
+        //可以接收List<Map<String, Double>>
+    }
+
+    public static void f(List<? extends Map<String, ?>> mapList) {
+
+    }
+
+    public static void f1(List<Map<String, ?>> mapList1) {
+
+    }
+
+    public static <T> void f2(List<Map<String, T>> mapList1) {
+        //可以接收List<Map<String, Double>>
+    }
+
+    public static void f3(List<Map<String, ?>> mapList1) {
+
+    }
+
+    public static void f4(List<? extends Map<String, ?>> mapList1) {
+        //可以接收List<Map<String, Double>>
+    }
+
+    public static void ff(int i) {
+
+    }
 }
