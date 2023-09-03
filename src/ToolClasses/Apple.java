@@ -1,6 +1,6 @@
 package ToolClasses;
 
-public class Apple {
+public class Apple extends Fruit{
     Integer price;
     Integer number;
     String  name;
