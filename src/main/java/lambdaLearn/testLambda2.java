@@ -27,6 +27,8 @@ public class testLambda2 {
      */
     @Test
     public void test1() {
+
+
         Runnable r1= ()->System.out.println("hello");
         r1.run();
     }
