@@ -68,7 +68,7 @@ public class WordTemplateFiller {
                 if (text != null) {
                     paragraphText.append(text);
                 }
-            } catch (org.apache.xmlbeans.impl.values.XmlValueDisconnectedException e) {
+            } catch (Exception e) {
                 // 如果该 run 与底层 XML 断开，则跳过
             }
         }
@@ -150,22 +150,18 @@ public class WordTemplateFiller {
             return;
         }
 
-        // 多行文本情况下，拆分为文本部分和表格部分
+        // 多行文本情况下，拆分为文本部分和表格部分 todo 要兼容多表格多文本样式
         StringBuilder textPart = new StringBuilder();
         List<String> tableLines = new ArrayList<>();
 
-        boolean tableStarted = false;
+        // boolean tableStarted = false;
         for (String line : lines) {
             String trimLine = line.trim();
-            if (trimLine.startsWith("|")) {
-                tableStarted = true;
-            }
-            if (!tableStarted) {
-                // 尚未进入表格部分，作为纯文本处理
-                textPart.append(line).append("\n");
-            } else {
+            if (trimLine.startsWith("|") && trimLine.endsWith("|") ) {
                 // 作为表格部分处理
                 tableLines.add(trimLine);
+            }else {
+                textPart.append(line).append("\n");
             }
         }
 
@@ -178,7 +174,7 @@ public class WordTemplateFiller {
         // 如果检测到表格行，则在当前段落后插入新的段落和表格
         if (!tableLines.isEmpty()) {
             XWPFTable newTable = insertTableAfterParagraph(paragraph, doc, tableLines);
-            // 如有需要，可在此处对 newTable 设置样式
+            // 如有需要，可在此处对 newTable 设置其他样式
         }
     }
 
@@ -190,10 +186,6 @@ public class WordTemplateFiller {
                                                        List<String> tableLines) {
         // 1) 获取当前段落在文档中所有段落中的索引
         int paragraphPos = doc.getParagraphs().indexOf(paragraph);
-        if (paragraphPos < 0) {
-            // 如果找不到，则退回到在文档末尾创建表格
-            return createTableAtDocEnd(doc, tableLines);
-        }
 
         // 2) 在该段落后创建一个新的段落，使其紧跟在原段落之后
         XWPFParagraph newPara = doc.createParagraph();
@@ -207,15 +199,6 @@ public class WordTemplateFiller {
         moveTableToPosition(doc, tempTable, paragraphPos + 2);
 
         return tempTable;
-    }
-
-    /**
-     * 备用方法：直接在文档末尾创建并填充表格。
-     */
-    private static XWPFTable createTableAtDocEnd(XWPFDocument doc, List<String> tableLines) {
-        XWPFTable tbl = doc.createTable();
-        fillMarkdownTable(tbl, tableLines);
-        return tbl;
     }
 
     /**
@@ -275,15 +258,18 @@ public class WordTemplateFiller {
     }
 
     /**
-     * 将解析后的 Markdown 表格行填充到指定表格中。
+     * 将解析后的 Markdown 表格行填充到指定表格中，并设置表格及单元格内容居中。
      */
     private static void fillMarkdownTable(XWPFTable table, List<String> tableLines) {
-        // 1. 若表格行数不足（至少需要两行：表头和分隔线），则直接返回
+        // 如果表格行数不足（至少需要两行：表头和分隔线），则直接返回
         if (tableLines.size() < 2) {
             return;
         }
 
-        // 2. 解析表头（第一行）
+        // 设置表格整体居中
+        table.setTableAlignment(TableRowAlign.CENTER);
+
+        // 解析表头（第一行）
         String headerLine = tableLines.get(0);
         headerLine = headerLine.replaceAll("^\\|", "").replaceAll("\\|$", "");
         String[] headers = headerLine.split("\\|");
@@ -294,12 +280,19 @@ public class WordTemplateFiller {
         for (int i = headerRow.getTableCells().size(); i < headers.length; i++) {
             headerRow.addNewTableCell();
         }
-        // 填充表头文本
+        // 填充表头文本，并设置单元格内容居中
         for (int i = 0; i < headers.length; i++) {
-            headerRow.getCell(i).setText(headers[i].trim());
+            XWPFTableCell cell = headerRow.getCell(i);
+            cell.setText(headers[i].trim());
+            // 设置单元格垂直居中
+            cell.setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
+            // 将单元格内所有段落设置水平居中
+            for (XWPFParagraph para : cell.getParagraphs()) {
+                para.setAlignment(ParagraphAlignment.CENTER);
+            }
         }
 
-        // 3. 从第三行开始填充数据行（即索引为 2 及以后的行）
+        // 从第三行开始填充数据行（即索引为 2 及以后的行）
         for (int i = 2; i < tableLines.size(); i++) {
             String dataLine = tableLines.get(i);
             // 去除行首和行尾的竖线
@@ -307,9 +300,22 @@ public class WordTemplateFiller {
             String[] cols = dataLine.split("\\|");
 
             XWPFTableRow dataRow = table.createRow(); // 新建数据行
-            // 逐列填充数据
+            // 遍历每一列，并设置文本和居中格式
             for (int colIndex = 0; colIndex < cols.length; colIndex++) {
-                dataRow.getCell(colIndex).setText(cols[colIndex].trim());
+                XWPFTableCell cell;
+                // 如果当前数据行已有对应的单元格则使用，否则新增
+                if (colIndex < dataRow.getTableCells().size()) {
+                    cell = dataRow.getCell(colIndex);
+                } else {
+                    cell = dataRow.addNewTableCell();
+                }
+                cell.setText(cols[colIndex].trim());
+                // 设置单元格垂直居中
+                cell.setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
+                // 设置单元格内所有段落水平居中
+                for (XWPFParagraph para : cell.getParagraphs()) {
+                    para.setAlignment(ParagraphAlignment.CENTER);
+                }
             }
         }
     }
