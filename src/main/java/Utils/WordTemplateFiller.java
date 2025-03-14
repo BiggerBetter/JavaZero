@@ -2,7 +2,7 @@ package Utils;
 
 import org.apache.poi.xwpf.usermodel.*;
 import org.apache.xmlbeans.XmlCursor;
-
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTbl;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.*;
@@ -62,8 +62,15 @@ public class WordTemplateFiller {
                                          Map<String, String> placeholders) {
         // 收集此段落中所有 run 的文本并合并
         StringBuilder paragraphText = new StringBuilder();
-        for (XWPFRun run : paragraph.getRuns()) {
-            paragraphText.append(run.toString());
+        for (XWPFRun run : new ArrayList<>(paragraph.getRuns())) {
+            try {
+                String text = run.getText(0);
+                if (text != null) {
+                    paragraphText.append(text);
+                }
+            } catch (org.apache.xmlbeans.impl.values.XmlValueDisconnectedException e) {
+                // 如果该 run 已经与底层 XML 断开，则跳过
+            }
         }
 
         // 找占位符
@@ -181,39 +188,95 @@ public class WordTemplateFiller {
     }
 
     /**
-     * 在指定段落后面插入一个表格(作为示例)，如果段落在表格单元格里，
-     * 则将表格插入到同一个单元格里；否则插到文档层。
+     * 在指定段落“后面”插入一个新的段落 + 表格，而不是跑到文档末尾
      */
     private static XWPFTable insertTableAfterParagraph(XWPFParagraph paragraph,
                                                        XWPFDocument doc,
                                                        List<String> tableLines) {
-        if (paragraph.getBody() instanceof XWPFTableCell) {
-            // 如果当前段落位于表格单元格中：
-            XWPFTableCell cell = (XWPFTableCell) paragraph.getBody();
+        // 1) 找出 paragraph 在 doc.getParagraphs() 的位置
+        int paragraphPos = doc.getParagraphs().indexOf(paragraph);
+        if (paragraphPos < 0) {
+            // 理论上不太会发生，除非这个段落不在当前 doc 里
+            // 那就退回默认做法
+            return createTableAtDocEnd(doc, tableLines);
+        }
 
-            // （兼容做法）先在文档层创建一个临时表格
-            XWPFTable tempTable = doc.createTable();
-            // 填充 Markdown
-            fillMarkdownTable(tempTable, tableLines);
+        // 2) 在 paragraphPos+1 的位置创建新段落
+        //    这样它就会紧跟在原段落之后
+        XWPFParagraph newPara = doc.createParagraph();
+        // 将这个新的段落设到指定位置
+        doc.setParagraph(newPara, paragraphPos + 1);
 
-            // 将临时表格的 XML 拷贝到单元格
-            cell.getCTTc().addNewTbl().set(tempTable.getCTTbl());
+        // 3) 再创建一个表格并插入到“新段落”之后
+        // POI 没有像“insertNewTable(索引)”之类的简单方法，需要在 XML 层操作；
+        // 可以用“先创建，再移动”，或者干脆先在文档末尾创建，之后再删除临时位置。
+        // 这里演示一个简化方案：直接在文档末尾创建表格，但马上移动到指定位置。
 
-            // 移除文档顶层生成的临时表格
-            int posInDoc = doc.getBodyElements().indexOf(tempTable);
-            if (posInDoc >= 0) {
-                doc.removeBodyElement(posInDoc);
-            }
+        XWPFTable tempTable = doc.createTable();
+        // 填充数据
+        fillMarkdownTable(tempTable, tableLines);
 
-            return tempTable;
+        // 4) 我们把刚才创建的表格“移”到 newPara 后面
+        moveTableToPosition(doc, tempTable, paragraphPos + 2);
+
+        return tempTable;
+    }
+
+    /** 备用：直接在文档末尾创建并填充表格 */
+    private static XWPFTable createTableAtDocEnd(XWPFDocument doc, List<String> tableLines) {
+        XWPFTable tbl = doc.createTable();
+        fillMarkdownTable(tbl, tableLines);
+        return tbl;
+    }
+
+    private static void moveTableToPosition(XWPFDocument doc, XWPFTable table, int newPos) {
+        // Find the current position of the table in the document body
+        List<IBodyElement> bodyElements = doc.getBodyElements();
+        int oldPos = bodyElements.indexOf(table);
+        if (oldPos == -1 || newPos < 0) {
+            return; // Not found or invalid position
+        }
+        if (newPos == oldPos) {
+            return; // Already in the desired position
+        }
+
+        // Clone the table's underlying CTTbl before removal to avoid orphaned XML issues
+        CTTbl clonedCTTbl = (CTTbl) table.getCTTbl().copy();
+
+        // Remove the table from its old position
+        doc.removeBodyElement(oldPos);
+
+        // Adjust newPos if the removal shifted the indices
+        if (oldPos < newPos) {
+            newPos--;
+        }
+        int currentSize = doc.getBodyElements().size();
+        if (newPos > currentSize) {
+            newPos = currentSize;
+        }
+
+        // Get the CTBody of the document
+        org.openxmlformats.schemas.wordprocessingml.x2006.main.CTBody ctBody = doc.getDocument().getBody();
+
+        // Create a new table at the end of the body
+        CTTbl newCTTbl = ctBody.addNewTbl();
+
+        // Set the new table's content using the cloned CT table
+        newCTTbl.set(clonedCTTbl);
+
+        // Get the DOM nodes for the body and the new table
+        org.w3c.dom.Node bodyNode = ctBody.getDomNode();
+        org.w3c.dom.Node newTblNode = newCTTbl.getDomNode();
+
+        // Remove the newly added table node from its current position
+        bodyNode.removeChild(newTblNode);
+
+        // Insert the table node at the desired index
+        org.w3c.dom.Node refNode = bodyNode.getChildNodes().item(newPos);
+        if (refNode != null) {
+            bodyNode.insertBefore(newTblNode, refNode);
         } else {
-            // 如果不在表格单元格中，就在文档层插入
-            // 先新建一个段落(用于分隔表格和之前的文字)
-            XWPFParagraph newPara = doc.insertNewParagraph(paragraph.getCTP().newCursor());
-            // 然后创建表格并填充
-            XWPFTable newTable = doc.createTable();
-            fillMarkdownTable(newTable, tableLines);
-            return newTable;
+            bodyNode.appendChild(newTblNode);
         }
     }
 
