@@ -1,0 +1,9 @@
+        Map<String, String> placeholders = new HashMap<>();
+        placeholders.put("name", "张三");
+        placeholders.put("department", "技术部");
+        placeholders.put("report_date", "2023-10-01");
+        // 示例：既包含表名，又包含 Markdown 风格表格
+        placeholders.put("sales_data", "销售额表：\n| 产品 | 销量 |\n|----|----|\n| 手机 | 1000 |\n| 电脑 | 500 |");
+
+        String inputPath = "/Users/Jenius/Desktop/格式测试模版.docx";
+        String outputPath = "/Users/Jenius/Desktop/outputByGPT-o1.docx";

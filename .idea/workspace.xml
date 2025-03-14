@@ -4,12 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="34f2791f-6dd7-4b57-b88b-ac9900eb107d" name="Changes" comment="专项债格式化第一版，填充表格不符合预期">
-      <change afterPath="$PROJECT_DIR$/src/main/java/Utils/WordTemplateEngine.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/Utils/WordTemplateFiller.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/Utils/WordTemplateProcessor.java" afterDir="false" />
+    <list default="true" id="34f2791f-6dd7-4b57-b88b-ac9900eb107d" name="Changes" comment="还是o1牛逼，第一版就跑通了，但是excel没插进去">
+      <change afterPath="$PROJECT_DIR$/src/main/java/Utils/tmp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Utils/WordTemplateFiller.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Utils/WordTemplateFiller.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -158,7 +157,15 @@
       <option name="project" value="LOCAL" />
       <updated>1741778296698</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="还是o1牛逼，第一版就跑通了，但是excel没插进去">
+      <option name="closed" value="true" />
+      <created>1741845470877</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1741845470877</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -166,7 +173,19 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="HEAD" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
@@ -177,6 +196,23 @@
     <MESSAGE value="代码编码程序" />
     <MESSAGE value="代码编码程序优化" />
     <MESSAGE value="专项债格式化第一版，填充表格不符合预期" />
-    <option name="LAST_COMMIT_MESSAGE" value="专项债格式化第一版，填充表格不符合预期" />
+    <MESSAGE value="还是o1牛逼，第一版就跑通了，但是excel没插进去" />
+    <option name="LAST_COMMIT_MESSAGE" value="还是o1牛逼，第一版就跑通了，但是excel没插进去" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/Utils/WordTemplateFiller.java</url>
+          <line>96</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/Utils/WordTemplateFiller.java</url>
+          <line>177</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
