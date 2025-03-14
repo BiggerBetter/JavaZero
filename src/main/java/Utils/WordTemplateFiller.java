@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 public class WordTemplateFiller {
 
-    // 匹配形如：${占位符} 的正则
+    // 匹配形如：${占位符} 的正则表达式
     private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\$\\{([^}]+)\\}");
 
     public static void main(String[] args) {
@@ -20,29 +20,29 @@ public class WordTemplateFiller {
         placeholders.put("name", "张三");
         placeholders.put("department", "技术部");
         placeholders.put("report_date", "2023-10-01");
-        // 示例：既包含表名，又包含 Markdown 风格表格
+        // 示例：既包含表头文本，又包含 Markdown 风格表格
         placeholders.put("sales_data", "销售额表：\n| 产品 | 销量 |\n|----|----|\n| 手机 | 1000 |\n| 电脑 | 500 |");
 
-        // 模版与结果输出路径可自定义
+        // 模板文件和输出文件路径（可根据需要修改）
         String inputPath = "/Users/Jenius/Desktop/格式测试模版.docx";
         String outputPath = "/Users/Jenius/Desktop/outputByGPT-o1.docx";
 
         try (FileInputStream fis = new FileInputStream(inputPath);
              XWPFDocument doc = new XWPFDocument(fis)) {
 
-            // 1. 先处理文档中不在表格里的段落
+            // 1. 处理文档中非表格内的段落
             List<XWPFParagraph> paragraphs = new ArrayList<>(doc.getParagraphs());
             for (XWPFParagraph paragraph : paragraphs) {
                 processParagraph(paragraph, doc, placeholders);
             }
 
-            // 2. 再递归处理文档中所有表格里的段落
+            // 2. 递归处理文档中所有表格内的段落
             List<XWPFTable> tables = doc.getTables();
             for (XWPFTable table : tables) {
                 processTable(table, doc, placeholders);
             }
 
-            // 输出结果
+            // 输出处理后的文档
             try (FileOutputStream fos = new FileOutputStream(outputPath)) {
                 doc.write(fos);
             }
@@ -55,12 +55,12 @@ public class WordTemplateFiller {
 
     /**
      * 处理普通段落，查找并替换其中的占位符。
-     * 若替换内容包含表格，需额外插入表格。
+     * 若替换内容包含表格，则额外插入表格。
      */
     private static void processParagraph(XWPFParagraph paragraph,
                                          XWPFDocument doc,
                                          Map<String, String> placeholders) {
-        // 收集此段落中所有 run 的文本并合并
+        // 收集该段落中所有 run 的文本并合并
         StringBuilder paragraphText = new StringBuilder();
         for (XWPFRun run : new ArrayList<>(paragraph.getRuns())) {
             try {
@@ -69,38 +69,37 @@ public class WordTemplateFiller {
                     paragraphText.append(text);
                 }
             } catch (org.apache.xmlbeans.impl.values.XmlValueDisconnectedException e) {
-                // 如果该 run 已经与底层 XML 断开，则跳过
+                // 如果该 run 与底层 XML 断开，则跳过
             }
         }
 
-        // 找占位符
+        // 查找占位符
         Matcher matcher = PLACEHOLDER_PATTERN.matcher(paragraphText.toString());
         if (!matcher.find()) {
-            return; // 无占位符则不处理
+            return; // 如果没有占位符则不处理
         }
 
-        // 如果找到占位符，则先清空原来的 runs，后面重建
+        // 找到占位符后，清空原有的 runs，后续重建
         for (int i = paragraph.getRuns().size() - 1; i >= 0; i--) {
             paragraph.removeRun(i);
         }
 
-        // 我们需要重新对段落文本进行逐个替换操作
-        // 因为可能有多个占位符
+        // 对段落文本进行逐个替换（可能存在多个占位符）
         int lastIndex = 0;
         matcher.reset();
         while (matcher.find()) {
-            // 占位符开始之前的纯文本
+            // 占位符之前的纯文本
             String textBefore = paragraphText.substring(lastIndex, matcher.start());
             if (!textBefore.isEmpty()) {
                 XWPFRun run = paragraph.createRun();
                 run.setText(textBefore);
             }
 
-            // 占位符内容
-            String placeHolderKey = matcher.group(1); // group(1)匹配的是占位符内部的文字
+            // 获取占位符内部的内容
+            String placeHolderKey = matcher.group(1);
             String replaceValue = placeholders.getOrDefault(placeHolderKey, "");
 
-            // 写入占位符对应替换内容
+            // 将占位符替换为对应内容（可能包含表格）
             insertReplacement(paragraph, doc, replaceValue);
 
             lastIndex = matcher.end();
@@ -115,19 +114,19 @@ public class WordTemplateFiller {
     }
 
     /**
-     * 遍历并处理表格中的所有段落（表格->行->单元格->段落）。
+     * 处理表格内的所有段落（遍历表格 -> 行 -> 单元格 -> 段落）。
      */
     private static void processTable(XWPFTable table,
                                      XWPFDocument doc,
                                      Map<String, String> placeholders) {
         for (XWPFTableRow row : table.getRows()) {
             for (XWPFTableCell cell : row.getTableCells()) {
-                // 递归处理这个单元格里的段落
+                // 递归处理单元格内的段落
                 List<XWPFParagraph> cellParagraphs = new ArrayList<>(cell.getParagraphs());
                 for (XWPFParagraph p : cellParagraphs) {
                     processParagraph(p, doc, placeholders);
                 }
-                // 如果单元格里还嵌套表格（理论上也可能），可进一步递归
+                // 如果单元格中嵌套有表格，也进行递归处理
                 for (XWPFTable nestedTable : cell.getTables()) {
                     processTable(nestedTable, doc, placeholders);
                 }
@@ -136,24 +135,22 @@ public class WordTemplateFiller {
     }
 
     /**
-     * 根据替换内容，插入到当前段落中。
-     * 若包含 Markdown 风格表格，则先写入前面的文本(若有)，再新建段落或表格。
+     * 根据替换内容，将内容插入到当前段落中。
+     * 如果内容包含 Markdown 风格的表格，则先写入文本部分，再插入新的段落和表格。
      */
     private static void insertReplacement(XWPFParagraph paragraph,
                                           XWPFDocument doc,
                                           String replaceValue) {
-        // 判断是否包含可能的 markdown 表格(竖线 + 换行)
-        // 例如："销售额表：\n| 产品 | 销量 |\n|----|----|\n| 手机 | 1000 |\n| 电脑 | 500 |"
-        // 这里简单约定：如果文本里出现换行 + “|”这样的结构，就认为后续是表格
+        // 判断是否包含类似 Markdown 表格的格式（竖线和换行）
         String[] lines = replaceValue.split("\n");
         if (lines.length == 1) {
-            // 不含换行的简单文本
+            // 如果仅为单行文本，则直接写入
             XWPFRun run = paragraph.createRun();
             run.setText(replaceValue);
             return;
         }
 
-        // 如果有多行，那我们尝试找出普通文本部分和表格部分
+        // 多行文本情况下，拆分为文本部分和表格部分
         StringBuilder textPart = new StringBuilder();
         List<String> tableLines = new ArrayList<>();
 
@@ -164,89 +161,86 @@ public class WordTemplateFiller {
                 tableStarted = true;
             }
             if (!tableStarted) {
-                // 还没开始表格部分，都当作普通文本
+                // 尚未进入表格部分，作为纯文本处理
                 textPart.append(line).append("\n");
             } else {
-                // 属于表格部分
+                // 作为表格部分处理
                 tableLines.add(trimLine);
             }
         }
 
-        // 写入文本部分（若有）
+        // 写入文本部分（如果存在）
         if (textPart.length() > 0) {
             XWPFRun run = paragraph.createRun();
-            // 去掉多余换行或可以只保留一个换行符
             run.setText(textPart.toString().trim());
         }
 
-        // 如果检测到表格行，则插入一个新表格
+        // 如果检测到表格行，则在当前段落后插入新的段落和表格
         if (!tableLines.isEmpty()) {
-            // 在所在段落后面插入一个段落 + 表格
             XWPFTable newTable = insertTableAfterParagraph(paragraph, doc, tableLines);
-            // 根据需要，可对 newTable 设置样式
+            // 如有需要，可在此处对 newTable 设置样式
         }
     }
 
     /**
-     * 在指定段落“后面”插入一个新的段落 + 表格，而不是跑到文档末尾
+     * 在指定段落后插入一个新的段落和表格，而不是将表格直接插入到文档末尾。
      */
     private static XWPFTable insertTableAfterParagraph(XWPFParagraph paragraph,
                                                        XWPFDocument doc,
                                                        List<String> tableLines) {
-        // 1) 找出 paragraph 在 doc.getParagraphs() 的位置
+        // 1) 获取当前段落在文档中所有段落中的索引
         int paragraphPos = doc.getParagraphs().indexOf(paragraph);
         if (paragraphPos < 0) {
-            // 理论上不太会发生，除非这个段落不在当前 doc 里
-            // 那就退回默认做法
+            // 如果找不到，则退回到在文档末尾创建表格
             return createTableAtDocEnd(doc, tableLines);
         }
 
-        // 2) 在 paragraphPos+1 的位置创建新段落
-        //    这样它就会紧跟在原段落之后
+        // 2) 在该段落后创建一个新的段落，使其紧跟在原段落之后
         XWPFParagraph newPara = doc.createParagraph();
-        // 将这个新的段落设到指定位置
         doc.setParagraph(newPara, paragraphPos + 1);
 
-        // 3) 再创建一个表格并插入到“新段落”之后
-        // POI 没有像“insertNewTable(索引)”之类的简单方法，需要在 XML 层操作；
-        // 可以用“先创建，再移动”，或者干脆先在文档末尾创建，之后再删除临时位置。
-        // 这里演示一个简化方案：直接在文档末尾创建表格，但马上移动到指定位置。
-
+        // 3) 在文档中创建一个表格，并填充数据
         XWPFTable tempTable = doc.createTable();
-        // 填充数据
         fillMarkdownTable(tempTable, tableLines);
 
-        // 4) 我们把刚才创建的表格“移”到 newPara 后面
+        // 4) 将创建的表格移动到新段落后（即原段落后第二个位置）
         moveTableToPosition(doc, tempTable, paragraphPos + 2);
 
         return tempTable;
     }
 
-    /** 备用：直接在文档末尾创建并填充表格 */
+    /**
+     * 备用方法：直接在文档末尾创建并填充表格。
+     */
     private static XWPFTable createTableAtDocEnd(XWPFDocument doc, List<String> tableLines) {
         XWPFTable tbl = doc.createTable();
         fillMarkdownTable(tbl, tableLines);
         return tbl;
     }
 
+    /**
+     * 将文档中已有的表格移动到指定的索引位置。
+     * 此方法先克隆表格底层的 CTTbl，以避免 XML 脱离关联的问题，
+     * 然后通过 DOM 操作将该表格插入到文档指定位置。
+     */
     private static void moveTableToPosition(XWPFDocument doc, XWPFTable table, int newPos) {
-        // Find the current position of the table in the document body
+        // 在文档的 bodyElements 中查找该表格的当前位置
         List<IBodyElement> bodyElements = doc.getBodyElements();
         int oldPos = bodyElements.indexOf(table);
         if (oldPos == -1 || newPos < 0) {
-            return; // Not found or invalid position
+            return; // 未找到表格或索引无效
         }
         if (newPos == oldPos) {
-            return; // Already in the desired position
+            return; // 表格已在目标位置，无需移动
         }
 
-        // Clone the table's underlying CTTbl before removal to avoid orphaned XML issues
+        // 克隆表格的底层 CTTbl，避免出现 XML 脱离关联的问题
         CTTbl clonedCTTbl = (CTTbl) table.getCTTbl().copy();
 
-        // Remove the table from its old position
+        // 从文档中移除原有表格
         doc.removeBodyElement(oldPos);
 
-        // Adjust newPos if the removal shifted the indices
+        // 调整索引：如果旧位置小于新位置，则新位置减一
         if (oldPos < newPos) {
             newPos--;
         }
@@ -255,23 +249,23 @@ public class WordTemplateFiller {
             newPos = currentSize;
         }
 
-        // Get the CTBody of the document
+        // 获取文档的 CTBody 对象
         org.openxmlformats.schemas.wordprocessingml.x2006.main.CTBody ctBody = doc.getDocument().getBody();
 
-        // Create a new table at the end of the body
+        // 在文档末尾创建一个新的表格节点
         CTTbl newCTTbl = ctBody.addNewTbl();
 
-        // Set the new table's content using the cloned CT table
+        // 用克隆的 CT 表格内容设置新表格
         newCTTbl.set(clonedCTTbl);
 
-        // Get the DOM nodes for the body and the new table
+        // 获取 CTBody 和新表格的 DOM 节点
         org.w3c.dom.Node bodyNode = ctBody.getDomNode();
         org.w3c.dom.Node newTblNode = newCTTbl.getDomNode();
 
-        // Remove the newly added table node from its current position
+        // 从当前节点中移除新表格节点
         bodyNode.removeChild(newTblNode);
 
-        // Insert the table node at the desired index
+        // 在指定索引位置插入该表格节点
         org.w3c.dom.Node refNode = bodyNode.getChildNodes().item(newPos);
         if (refNode != null) {
             bodyNode.insertBefore(newTblNode, refNode);
@@ -281,22 +275,22 @@ public class WordTemplateFiller {
     }
 
     /**
-     * 将 tableLines(已解析好的 Markdown 行) 填充到给定表格里。
+     * 将解析后的 Markdown 表格行填充到指定表格中。
      */
     private static void fillMarkdownTable(XWPFTable table, List<String> tableLines) {
-        // 1. 判断是否有足够的行数（至少2行：第一行表头，第二行分隔线）
+        // 1. 若表格行数不足（至少需要两行：表头和分隔线），则直接返回
         if (tableLines.size() < 2) {
             return;
         }
 
-        // 2. 解析表头（第1行）
+        // 2. 解析表头（第一行）
         String headerLine = tableLines.get(0);
         headerLine = headerLine.replaceAll("^\\|", "").replaceAll("\\|$", "");
         String[] headers = headerLine.split("\\|");
 
-        // 默认表格已自动创建一行
+        // 默认表格已创建第一行
         XWPFTableRow headerRow = table.getRow(0);
-        // 确保第一行有足够的单元格
+        // 确保表头行中单元格数量足够
         for (int i = headerRow.getTableCells().size(); i < headers.length; i++) {
             headerRow.addNewTableCell();
         }
@@ -305,15 +299,15 @@ public class WordTemplateFiller {
             headerRow.getCell(i).setText(headers[i].trim());
         }
 
-        // 3. 从第三行(索引2)开始，是数据行
+        // 3. 从第三行开始填充数据行（即索引为 2 及以后的行）
         for (int i = 2; i < tableLines.size(); i++) {
             String dataLine = tableLines.get(i);
-            // 去掉开头和结尾的 "|"
+            // 去除行首和行尾的竖线
             dataLine = dataLine.replaceAll("^\\|", "").replaceAll("\\|$", "");
             String[] cols = dataLine.split("\\|");
 
-            XWPFTableRow dataRow = table.createRow(); // 新增一行
-            // 逐列填充
+            XWPFTableRow dataRow = table.createRow(); // 新建数据行
+            // 逐列填充数据
             for (int colIndex = 0; colIndex < cols.length; colIndex++) {
                 dataRow.getCell(colIndex).setText(cols[colIndex].trim());
             }
