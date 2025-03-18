@@ -3,8 +3,13 @@ package Utils;
 import org.apache.poi.xwpf.usermodel.*;
 import org.apache.xmlbeans.XmlCursor;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTbl;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTblPr;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTblLayoutType;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTblWidth;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,7 +26,7 @@ public class WordTemplateFiller {
         placeholders.put("department", "技术部");
         placeholders.put("report_date", "2023-10-01");
         // 示例：既包含表头文本，又包含 Markdown 风格表格
-        placeholders.put("sales_data", "销售额表：\n| 产品 | 销量 |\n|----|----|\n| 手机 | 1000 |\n| 电脑 | 500 |");
+        placeholders.put("sales_data", "销售额表：\n| 产品 | 销量 |\n|----|----|\n| 手机 | 1000000000000000000000000000000000000000000 |\n| 电脑 | 500 |");
 
         // 模板文件和输出文件路径（可根据需要修改）
         String inputPath = "/Users/Jenius/Desktop/格式测试模版.docx";
@@ -127,9 +132,9 @@ public class WordTemplateFiller {
                     processParagraph(p, doc, placeholders);
                 }
                 // 如果单元格中嵌套有表格，也进行递归处理
-                for (XWPFTable nestedTable : cell.getTables()) {
-                    processTable(nestedTable, doc, placeholders);
-                }
+                // for (XWPFTable nestedTable : cell.getTables()) {
+                //     processTable(nestedTable, doc, placeholders);
+                // }
             }
         }
     }
@@ -266,6 +271,25 @@ public class WordTemplateFiller {
             return;
         }
 
+        // 设置表格自动调整布局（自动宽度）
+        if (table.getCTTbl().getTblPr() == null) {
+            table.getCTTbl().addNewTblPr();
+        }
+        CTTblPr tblPr = table.getCTTbl().getTblPr();
+        // 设置自动布局（自动调整列宽）
+        if (!tblPr.isSetTblLayout()) {
+            tblPr.addNewTblLayout().setType(STTblLayoutType.AUTOFIT);
+        } else {
+            tblPr.getTblLayout().setType(STTblLayoutType.AUTOFIT);
+        }
+        // 设置表格宽度为自动
+        if (!tblPr.isSetTblW()) {
+            tblPr.addNewTblW().setType(STTblWidth.AUTO);
+            tblPr.getTblW().setW(BigInteger.ZERO);
+        } else {
+            tblPr.getTblW().setType(STTblWidth.AUTO);
+            tblPr.getTblW().setW(BigInteger.ZERO);
+        }
         // 设置表格整体居中
         table.setTableAlignment(TableRowAlign.CENTER);
 
@@ -317,6 +341,11 @@ public class WordTemplateFiller {
                     para.setAlignment(ParagraphAlignment.CENTER);
                 }
             }
+        }
+
+        // 设置所有行的高度为自动（Word 会根据内容自动调整）
+        for (XWPFTableRow row : table.getRows()) {
+            row.setHeightRule(TableRowHeightRule.AUTO);
         }
     }
 }
