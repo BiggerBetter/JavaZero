@@ -10,6 +10,9 @@ import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTblWidth;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,7 +29,12 @@ public class WordTemplateFiller {
         placeholders.put("department", "技术部");
         placeholders.put("report_date", "2023-10-01");
         // 示例：既包含表头文本，又包含 Markdown 风格表格
-        placeholders.put("sales_data", "销售额表：\n| 产品 | 销量 |\n|----|----|\n| 手机 | 1000000000000000000000000000000000000000000 |\n| 电脑 | 500 |");
+        placeholders.put("sales_data", "销售额表：" +
+                "\n| 产品 | 销量 |" +
+                "\n|----|----|\n| 手机 | 1001 |\n| 电脑 | 501 |\n " +
+                "我有一个梦想" +
+                // "\n| 产品 | 销量 |\n|----|----|\n| 手机 | 1002 |\n| 电脑 | 502 |\n" +
+                "有梦想就会有奇迹");
 
         // 模板文件和输出文件路径（可根据需要修改）
         String inputPath = "/Users/Jenius/Desktop/格式测试模版.docx";
@@ -34,6 +42,11 @@ public class WordTemplateFiller {
 
         try (FileInputStream fis = new FileInputStream(inputPath);
              XWPFDocument doc = new XWPFDocument(fis)) {
+
+            Path outputPathPath = Paths.get(outputPath);
+            if (Files.exists(outputPathPath)) {
+                Files.delete(outputPathPath);
+            }
 
             // 1. 处理文档中非表格内的段落
             List<XWPFParagraph> paragraphs = new ArrayList<>(doc.getParagraphs());
@@ -102,10 +115,10 @@ public class WordTemplateFiller {
 
             // 获取占位符内部的内容
             String placeHolderKey = matcher.group(1);
-            String replaceValue = placeholders.getOrDefault(placeHolderKey, "");
+            String replaceValue = placeholders.getOrDefault(placeHolderKey, "");//获取替换信息
 
             // 将占位符替换为对应内容（可能包含表格）
-            insertReplacement(paragraph, doc, replaceValue);
+            insertReplacement(paragraph, doc, replaceValue);// 要调整的就是这个地方
 
             lastIndex = matcher.end();
         }
@@ -121,9 +134,7 @@ public class WordTemplateFiller {
     /**
      * 处理表格内的所有段落（遍历表格 -> 行 -> 单元格 -> 段落）。
      */
-    private static void processTable(XWPFTable table,
-                                     XWPFDocument doc,
-                                     Map<String, String> placeholders) {
+    private static void processTable(XWPFTable table, XWPFDocument doc, Map<String, String> placeholders) {
         for (XWPFTableRow row : table.getRows()) {
             for (XWPFTableCell cell : row.getTableCells()) {
                 // 递归处理单元格内的段落
@@ -155,32 +166,56 @@ public class WordTemplateFiller {
             return;
         }
 
-        // 多行文本情况下，拆分为文本部分和表格部分 todo 要兼容多表格多文本样式
-        StringBuilder textPart = new StringBuilder();
-        List<String> tableLines = new ArrayList<>();
+        List<List<String>> contentList = LineGrouper.groupLines(replaceValue);
 
-        // boolean tableStarted = false;
-        for (String line : lines) {
-            String trimLine = line.trim();
-            if (trimLine.startsWith("|") && trimLine.endsWith("|") ) {
-                // 作为表格部分处理
-                tableLines.add(trimLine);
-            }else {
-                textPart.append(line).append("\n");
+        int time = 1;
+        XWPFParagraph cyclePara = paragraph;
+        for (List<String> contentBlock : contentList) {
+            String firstLine = contentBlock.get(0).trim();
+            if (firstLine.startsWith("|") && firstLine.endsWith("|")) {
+                XWPFTable newTable = insertTableAfterParagraph(cyclePara, doc, contentBlock);
+                // 如有需要，可在此处对 newTable 设置其他样式
+                XWPFParagraph tmpPara  = doc.createParagraph();//填入空段落
+                cyclePara = tmpPara;
+                tmpPara.createRun().setText("test after table"+time);
+                time = time +1;
+            } else {
+                // 进入文本段落插入逻辑
+                XWPFParagraph newPara = doc.createParagraph();
+                XWPFRun run = newPara.createRun();
+                run.setText(String.join("\n",contentBlock).trim());
+                cyclePara = newPara;
             }
         }
 
-        // 写入文本部分（如果存在）
-        if (textPart.length() > 0) {
-            XWPFRun run = paragraph.createRun();
-            run.setText(textPart.toString().trim());
-        }
 
-        // 如果检测到表格行，则在当前段落后插入新的段落和表格
-        if (!tableLines.isEmpty()) {
-            XWPFTable newTable = insertTableAfterParagraph(paragraph, doc, tableLines);
-            // 如有需要，可在此处对 newTable 设置其他样式
-        }
+
+        // todo 要兼容多表格多文本样式
+        // StringBuilder textPart = new StringBuilder();
+        // List<String> tableLines = new ArrayList<>();
+        //
+        // // boolean tableStarted = false;
+        // for (String line : lines) {
+        //     String trimLine = line.trim();
+        //     if (trimLine.startsWith("|") && trimLine.endsWith("|") ) {
+        //         // 作为表格部分处理
+        //         tableLines.add(trimLine);
+        //     }else {
+        //         textPart.append(line).append("\n");
+        //     }
+        // }
+        //
+        // // 写入文本部分（如果存在）
+        // if (textPart.length() > 0) {
+        //     XWPFRun run = paragraph.createRun();
+        //     run.setText(textPart.toString().trim());
+        // }
+        //
+        // // 如果检测到表格行，则在当前段落后插入新的段落和表格
+        // if (!tableLines.isEmpty()) {
+        //     XWPFTable newTable = insertTableAfterParagraph(paragraph, doc, tableLines);
+        //     // 如有需要，可在此处对 newTable 设置其他样式
+        // }
     }
 
     /**
@@ -201,7 +236,7 @@ public class WordTemplateFiller {
         fillMarkdownTable(tempTable, tableLines);
 
         // 4) 将创建的表格移动到新段落后（即原段落后第二个位置）
-        moveTableToPosition(doc, tempTable, paragraphPos + 2);
+        moveTableToPosition(doc, tempTable, paragraphPos + 1);
 
         return tempTable;
     }
