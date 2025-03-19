@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 public class WordTemplateFiller {
 
     // 匹配形如：${占位符} 的正则表达式
-    private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\$\\{([^}]+)\\}");
+    public static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\$\\{([^}]+)\\}");
 
     public static void main(String[] args) {
         // 准备替换数据
@@ -76,7 +76,7 @@ public class WordTemplateFiller {
      * 处理普通段落，查找并替换其中的占位符。
      * 若替换内容包含表格，则额外插入表格。
      */
-    private static void processParagraph(XWPFParagraph paragraph,
+    public static void processParagraph(XWPFParagraph paragraph,
                                          XWPFDocument doc,
                                          Map<String, String> placeholders) {
         // 收集该段落中所有 run 的文本并合并
@@ -138,7 +138,7 @@ public class WordTemplateFiller {
     /**
      * 处理表格内的所有段落（遍历表格 -> 行 -> 单元格 -> 段落）。
      */
-    private static void processTable(XWPFTable table, XWPFDocument doc, Map<String, String> placeholders) {
+    public static void processTable(XWPFTable table, XWPFDocument doc, Map<String, String> placeholders) {
         for (XWPFTableRow row : table.getRows()) {
             for (XWPFTableCell cell : row.getTableCells()) {
                 // 递归处理单元格内的段落
@@ -158,7 +158,7 @@ public class WordTemplateFiller {
      * 根据替换内容，将内容插入到当前段落中。
      * 如果内容包含 Markdown 风格的表格，则先写入文本部分，再插入新的段落和表格。
      */
-    private static void insertReplacement(XWPFParagraph paragraph,
+    public static void insertReplacement(XWPFParagraph paragraph,
                                           XWPFDocument doc,
                                           String replaceValue) {
         // 判断是否包含类似 Markdown 表格的格式（竖线和换行）
@@ -225,7 +225,7 @@ public class WordTemplateFiller {
     /**
      * 在指定段落后插入一个新的段落和表格，而不是将表格直接插入到文档末尾。
      */
-    private static XWPFTable insertTableAfterParagraph(XWPFParagraph paragraph,
+    public static XWPFTable insertTableAfterParagraph(XWPFParagraph paragraph,
                                                        XWPFDocument doc,
                                                        List<String> tableLines) {
         // 1) 获取当前段落在文档中所有段落中的索引
@@ -250,7 +250,7 @@ public class WordTemplateFiller {
      * 此方法先克隆表格底层的 CTTbl，以避免 XML 脱离关联的问题，
      * 然后通过 DOM 操作将该表格插入到文档指定位置。
      */
-    private static void moveTableToPosition(XWPFDocument doc, XWPFTable table, int newPos) {
+    public static void moveTableToPosition(XWPFDocument doc, XWPFTable table, int newPos) {
         // 在文档的 bodyElements 中查找该表格的当前位置
         List<IBodyElement> bodyElements = doc.getBodyElements();
         int oldPos = bodyElements.indexOf(table);
@@ -304,7 +304,7 @@ public class WordTemplateFiller {
     /**
      * 将解析后的 Markdown 表格行填充到指定表格中，并设置表格及单元格内容居中。
      */
-    private static void fillMarkdownTable(XWPFTable table, List<String> tableLines) {
+    public static void fillMarkdownTable(XWPFTable table, List<String> tableLines) {
         // 如果表格行数不足（至少需要两行：表头和分隔线），则直接返回
         if (tableLines.size() < 2) {
             return;
