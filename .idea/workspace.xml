@@ -4,7 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="34f2791f-6dd7-4b57-b88b-ac9900eb107d" name="Changes" comment="单表格结尾版本">
+    <list default="true" id="34f2791f-6dd7-4b57-b88b-ac9900eb107d" name="Changes" comment="调试表格处理">
+      <change afterPath="$PROJECT_DIR$/src/main/java/Utils/WordPlaceholderWithFormat.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/Utils/WordTemplateFiller.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Utils/WordTemplateFiller.java" afterDir="false" />
     </list>
@@ -38,8 +39,9 @@
   "keyToString": {
     "Application.EncodeCode.executor": "Run",
     "Application.LineGrouper.executor": "Run",
+    "Application.WordPlaceholderWithFormat.executor": "Debug",
     "Application.WordTemplateEngine.executor": "Run",
-    "Application.WordTemplateFiller.executor": "Debug",
+    "Application.WordTemplateFiller.executor": "Run",
     "Application.WordTemplateProcessor.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "master",
@@ -59,7 +61,7 @@
       <recent name="Utils" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.WordTemplateFiller">
+  <component name="RunManager" selected="Application.WordPlaceholderWithFormat">
     <configuration name="EncodeCode" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="Utils.EncodeCode" />
       <module name="javaZero" />
@@ -75,6 +77,19 @@
     </configuration>
     <configuration name="LineGrouper" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="Utils.LineGrouper" />
+      <module name="javaZero" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="Utils.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="WordPlaceholderWithFormat" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="Utils.WordPlaceholderWithFormat" />
       <module name="javaZero" />
       <extension name="coverage">
         <pattern>
@@ -112,26 +127,13 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="WordTemplateProcessor" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="Utils.WordTemplateProcessor" />
-      <module name="javaZero" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="Utils.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.WordPlaceholderWithFormat" />
         <item itemvalue="Application.WordTemplateFiller" />
         <item itemvalue="Application.EncodeCode" />
         <item itemvalue="Application.LineGrouper" />
         <item itemvalue="Application.WordTemplateEngine" />
-        <item itemvalue="Application.WordTemplateProcessor" />
       </list>
     </recent_temporary>
   </component>
@@ -240,7 +242,15 @@
       <option name="project" value="LOCAL" />
       <updated>1742263044285</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="调试表格处理">
+      <option name="closed" value="true" />
+      <created>1742298284550</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1742298284551</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -278,7 +288,8 @@
     <MESSAGE value="终于行了，，，改了一百个报错" />
     <MESSAGE value="发现还是多删除了东西。。。。" />
     <MESSAGE value="单表格结尾版本" />
-    <option name="LAST_COMMIT_MESSAGE" value="单表格结尾版本" />
+    <MESSAGE value="调试表格处理" />
+    <option name="LAST_COMMIT_MESSAGE" value="调试表格处理" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -290,13 +301,28 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/Utils/WordTemplateFiller.java</url>
-          <line>172</line>
+          <line>176</line>
           <option name="timeStamp" value="9" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/Utils/WordTemplateFiller.java</url>
-          <line>227</line>
+          <line>231</line>
           <option name="timeStamp" value="10" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/Utils/WordTemplateFiller.java</url>
+          <line>167</line>
+          <option name="timeStamp" value="12" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/Utils/WordPlaceholderWithFormat.java</url>
+          <line>114</line>
+          <option name="timeStamp" value="15" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/Utils/WordPlaceholderWithFormat.java</url>
+          <line>67</line>
+          <option name="timeStamp" value="16" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

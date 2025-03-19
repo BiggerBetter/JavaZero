@@ -38,7 +38,7 @@ public class WordTemplateFiller {
 
         // 模板文件和输出文件路径（可根据需要修改）
         String inputPath = "/Users/Jenius/Desktop/格式测试模版.docx";
-        String outputPath = "/Users/Jenius/Desktop/outputByGPT-o1.docx";
+        String outputPath = "/Users/Jenius/Desktop/outputByGPT.docx";
 
         try (FileInputStream fis = new FileInputStream(inputPath);
              XWPFDocument doc = new XWPFDocument(fis)) {
@@ -51,6 +51,7 @@ public class WordTemplateFiller {
             // 1. 处理文档中非表格内的段落
             List<XWPFParagraph> paragraphs = new ArrayList<>(doc.getParagraphs());
             for (XWPFParagraph paragraph : paragraphs) {
+                // todo 可以分两种情况, 段落内替换,和插入段落两种. 如果是插入段落(包括表格)的操作呢,把最新的段落返回来.后面的统一拍一下序
                 processParagraph(paragraph, doc, placeholders);
             }
 
@@ -105,9 +106,11 @@ public class WordTemplateFiller {
         // 对段落文本进行逐个替换（可能存在多个占位符）
         int lastIndex = 0;
         matcher.reset();
+        String textBefore = "";
         while (matcher.find()) {
+
             // 占位符之前的纯文本
-            String textBefore = paragraphText.substring(lastIndex, matcher.start());
+            textBefore = paragraphText.substring(lastIndex, matcher.start());
             if (!textBefore.isEmpty()) {
                 XWPFRun run = paragraph.createRun();
                 run.setText(textBefore);
@@ -123,9 +126,10 @@ public class WordTemplateFiller {
             lastIndex = matcher.end();
         }
 
+
         // 占位符之后的纯文本
         String textAfter = paragraphText.substring(lastIndex);
-        if (!textAfter.isEmpty()) {
+        if (!textAfter.isEmpty()&& ! textBefore.isEmpty()) {
             XWPFRun run = paragraph.createRun();
             run.setText(textAfter);
         }
@@ -169,7 +173,7 @@ public class WordTemplateFiller {
         List<List<String>> contentList = LineGrouper.groupLines(replaceValue);
 
         int time = 1;
-        XWPFParagraph cyclePara = paragraph;
+        XWPFParagraph cyclePara = doc.createParagraph();
         for (List<String> contentBlock : contentList) {
             String firstLine = contentBlock.get(0).trim();
             if (firstLine.startsWith("|") && firstLine.endsWith("|")) {
