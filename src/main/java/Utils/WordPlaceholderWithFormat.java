@@ -9,6 +9,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +26,7 @@ public class WordPlaceholderWithFormat{
     private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\$\\{([^}]+)\\}");
     private static final XWPFDocument newDoc = new XWPFDocument();
 
-    private static Map<String, String> placeholders = new HashMap<>();
+    private static final Map<String, String> placeholders = new HashMap<>();
     static {
         placeholders.put("name", "张三");
         placeholders.put("department", "技术部");
@@ -33,58 +36,107 @@ public class WordPlaceholderWithFormat{
                 "\n| 产品 | 销量 |" +
                 "\n|----|----|\n| 手机 | 1001 |\n| 电脑 | 501 |\n " +
                 "我有一个梦想" +
-                // "\n| 产品 | 销量 |\n|----|----|\n| 手机 | 1002 |\n| 电脑 | 502 |\n" +
+                "\n| 产品 | 销量 |\n|----|----|\n| 手机 | 1002 |\n| 电脑 | 502 |\n" +
                 "有梦想就会有奇迹");
     }
-
-
 
     public static void main(String[] args) throws IOException {
         // 原始 .docx 文件路径
         String inputPath = "/Users/Jenius/Desktop/格式测试模版.docx";
         // 输出 .docx 文件路径
-        String outputPath = "/Users/Jenius/Desktop/formation.docx";
+        String outputPath = "/Users/Jenius/Desktop/formation-1.docx";
 
+        Path outputPathPath = Paths.get(outputPath);
+        if (Files.exists(outputPathPath)) {
+            Files.delete(outputPathPath);
+        }
 
-        // 1. 打开原文档
+        // 打开原文档
         XWPFDocument originalDoc;
         try (FileInputStream fis = new FileInputStream(inputPath)) {
             originalDoc = new XWPFDocument(fis);
         }
 
-        // 2. 新建目标文档
-        XWPFDocument newDoc = new XWPFDocument();
-
-
-
-        // 3. 遍历原文档的段落
-        for (XWPFParagraph originalPara : originalDoc.getParagraphs()) {
-
-            processParagraph(originalPara);
-
-            // 处理Excel内部的标记
-
-            List<XWPFTable> tables = originalDoc.getTables();
-            for (XWPFTable table : tables) {
-                processTable(table, doc, placeholders);
+        for (IBodyElement element : originalDoc.getBodyElements()) {
+            if (element instanceof XWPFParagraph) {
+                // 填充段落
+                processParagraph((XWPFParagraph)element);
+            } else if (element instanceof XWPFTable) {
+                // 填充表格
+                processTable((XWPFTable)element);
             }
-
-            // 输出处理后的文档
-            try (FileOutputStream fos = new FileOutputStream(outputPath)) {
-                doc.write(fos);
-            }
-            System.out.println("文档处理完成：" + outputPath);
-
         }
 
         // 5. 写出到结果文件
-        try (FileOutputStream fos = new FileOutputStream(outputPath)) {
+        try  {
+            FileOutputStream fos = new FileOutputStream(outputPath);
             newDoc.write(fos);
+            System.out.println("处理完成，生成新文档：" + outputPath);
+        }catch (Exception e){
+            System.out.println("发生错误：" + e.getMessage());
         }
-
-        System.out.println("处理完成，生成新文档：" + outputPath);
     }
 
+
+    /**
+     * 处理普通段落，查找并替换其中的占位符。
+     * 若替换内容包含表格，则额外插入表格。
+     */
+    public static void processTextInTable(XWPFParagraph paragraph) {
+
+        // 收集该段落中所有 run 的文本并合并
+        StringBuilder paragraphText = new StringBuilder();
+        for (XWPFRun run : new ArrayList<>(paragraph.getRuns())) {
+            try {
+                String text = run.getText(0);
+                if (text != null) {
+                    paragraphText.append(text);
+                }
+            } catch (Exception e) {
+                // 如果该 run 与底层 XML 断开，则跳过
+            }
+        }
+
+        // 查找占位符
+        Matcher matcher = PLACEHOLDER_PATTERN.matcher(paragraphText.toString());
+        if (!matcher.find()) {
+            return;
+        }
+
+        // 找到占位符后，清空原有的 runs，后续重建
+        for (int i = paragraph.getRuns().size() - 1; i >= 0; i--) {
+            paragraph.removeRun(i);
+        }
+
+        // 对段落文本进行逐个替换（可能存在多个占位符）
+        int lastIndex = 0;
+        matcher.reset();
+        String textBefore = "";
+        while (matcher.find()) {
+            // 占位符之前的纯文本
+            textBefore = paragraphText.substring(lastIndex, matcher.start());
+            if (!textBefore.isEmpty()) {
+                XWPFRun run = paragraph.createRun();
+                run.setText(textBefore);
+            }
+
+            // 获取占位符内部的内容
+            String placeHolderKey = matcher.group(1);
+            String replaceValue = placeholders.getOrDefault(placeHolderKey, "");// todo 正式代码中删除
+
+            // 将占位符替换为对应内容（可能包含表格）
+            insertReplacement(paragraph, replaceValue);
+
+            lastIndex = matcher.end();
+        }
+
+        // 占位符之后的纯文本  其实只要涉及但段落多次替换，就都不会插入新段落段落
+        String textAfter = paragraphText.substring(lastIndex);
+        if (!textAfter.isEmpty() && ! textBefore.isEmpty()) {
+            XWPFRun run = paragraph.createRun();
+            run.setText(textAfter);
+        }
+    }
 
     /**
      * 处理普通段落，查找并替换其中的占位符。
@@ -125,20 +177,16 @@ public class WordPlaceholderWithFormat{
         // 查找占位符
         Matcher matcher = PLACEHOLDER_PATTERN.matcher(paragraphText.toString());
         if (!matcher.find()) {
-            return; // 如果没有占位符则不处理
+            // 如果没有占位符则拷贝旧段落到新doc
+            copyParagraph(originalPara, newPara);
+            return;
         }
-
-        // // 找到占位符后，清空原有的 runs，后续重建
-        // for (int i = originalPara.getRuns().size() - 1; i >= 0; i--) {
-        //     originalPara.removeRun(i);
-        // }
 
         // 对段落文本进行逐个替换（可能存在多个占位符）
         int lastIndex = 0;
         matcher.reset();
         String textBefore = "";
         while (matcher.find()) {
-
             // 占位符之前的纯文本
             textBefore = paragraphText.substring(lastIndex, matcher.start());
             if (!textBefore.isEmpty()) {
@@ -148,10 +196,10 @@ public class WordPlaceholderWithFormat{
 
             // 获取占位符内部的内容
             String placeHolderKey = matcher.group(1);
-            String replaceValue = placeholders.getOrDefault(placeHolderKey, "");//获取替换信息
+            String replaceValue = placeholders.getOrDefault(placeHolderKey, "");// todo 正式代码中删除
 
             // 将占位符替换为对应内容（可能包含表格）
-            insertReplacement(newPara, replaceValue);// 要调整的就是这个地方
+            insertReplacement(newPara, replaceValue);
 
             lastIndex = matcher.end();
         }
@@ -162,11 +210,6 @@ public class WordPlaceholderWithFormat{
             XWPFRun run = newPara.createRun();
             run.setText(textAfter);
         }
-
-        //将替换后的runs写入新的paraph
-
-
-
     }
 
     /**
@@ -186,46 +229,28 @@ public class WordPlaceholderWithFormat{
 
         List<List<String>> contentList = LineGrouper.groupLines(replaceValue);
 
-        int time = 1;
-        // XWPFParagraph cyclePara = newDoc.createParagraph();
         for (List<String> contentBlock : contentList) {
             String firstLine = contentBlock.get(0).trim();
             if (firstLine.startsWith("|") && firstLine.endsWith("|")) {
-                XWPFTable newTable = createTableInNextParagraph( contentBlock);
+                XWPFTable newTable = createTable(contentBlock);
                 // 如有需要，可在此处对 newTable 设置其他样式
-                XWPFParagraph tmpPara  = newDoc.createParagraph();//填入空段落
-                // cyclePara = tmpPara;
-                tmpPara.createRun().setText("test after table"+time);
-                time = time +1;
             } else {
                 // 进入文本段落插入逻辑
                 XWPFParagraph newPara = newDoc.createParagraph();
                 XWPFRun run = newPara.createRun();
                 run.setText(String.join("\n",contentBlock).trim());
-                // cyclePara = newPara;
             }
         }
-
     }
 
 
     /**
      * 在指定段落后插入一个新的段落和表格，而不是将表格直接插入到文档末尾。
      */
-    public static XWPFTable createTableInNextParagraph(List<String> tableLines) {
-        // // 1) 获取当前段落在文档中所有段落中的索引
-        // int paragraphPos = doc.getParagraphs().indexOf(paragraph);
-
-        // 2) 在该段落后创建一个新的段落，使其紧跟在原段落之后
-        XWPFParagraph newPara = newDoc.createParagraph();
-        // doc.setParagraph(newPara, paragraphPos + 1);
-
-        // 3) 在文档中创建一个表格，并填充数据
+    public static XWPFTable createTable(List<String> tableLines) {
+        // 在文档中创建一个表格，并填充数据
         XWPFTable tempTable = newDoc.createTable();
         fillMarkdownTable(tempTable, tableLines);
-
-        // // 4) 将创建的表格移动到新段落后（即原段落后第二个位置）
-        // moveTableToPosition(doc, tempTable, paragraphPos + 1);
 
         return tempTable;
     }
@@ -320,17 +345,21 @@ public class WordPlaceholderWithFormat{
     /**
      * 处理表格内的所有段落（遍历表格 -> 行 -> 单元格 -> 段落）。
      */
-    public static void processTable(XWPFTable table, XWPFDocument doc, Map<String, String> placeholders) {
+    public static void processTable(XWPFTable table) {
         for (XWPFTableRow row : table.getRows()) {
             for (XWPFTableCell cell : row.getTableCells()) {
                 // 递归处理单元格内的段落
                 List<XWPFParagraph> cellParagraphs = new ArrayList<>(cell.getParagraphs());
                 for (XWPFParagraph p : cellParagraphs) {
-                    processParagraph(p);
+                    processTextInTable(p);
                 }
             }
         }
+        // 把填充后的表格，存储到新doc中
+        XWPFTable newTable = newDoc.createTable();
+        copyTable(table,newTable);
     }
+
 
     // 复制段落内容
     private static void copyParagraph(XWPFParagraph oldPara, XWPFParagraph newPara) {

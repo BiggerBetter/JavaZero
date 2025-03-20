@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="34f2791f-6dd7-4b57-b88b-ac9900eb107d" name="Changes" comment="private 改 public">
+    <list default="true" id="34f2791f-6dd7-4b57-b88b-ac9900eb107d" name="Changes" comment="调整doc处理流程">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/Utils/WordPlaceholderWithFormat.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Utils/WordPlaceholderWithFormat.java" afterDir="false" />
     </list>
@@ -40,7 +40,7 @@
     "Application.LineGrouper.executor": "Run",
     "Application.WordPlaceholderWithFormat.executor": "Debug",
     "Application.WordTemplateEngine.executor": "Run",
-    "Application.WordTemplateFiller.executor": "Run",
+    "Application.WordTemplateFiller.executor": "Debug",
     "Application.WordTemplateProcessor.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "master",
@@ -265,7 +265,15 @@
       <option name="project" value="LOCAL" />
       <updated>1742384812378</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="调整doc处理流程">
+      <option name="closed" value="true" />
+      <created>1742440118345</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1742440118345</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -305,7 +313,8 @@
     <MESSAGE value="单表格结尾版本" />
     <MESSAGE value="调试表格处理" />
     <MESSAGE value="private 改 public" />
-    <option name="LAST_COMMIT_MESSAGE" value="private 改 public" />
+    <MESSAGE value="调整doc处理流程" />
+    <option name="LAST_COMMIT_MESSAGE" value="调整doc处理流程" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -317,13 +326,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/Utils/WordTemplateFiller.java</url>
-          <line>231</line>
-          <option name="timeStamp" value="10" />
+          <line>146</line>
+          <option name="timeStamp" value="26" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/Utils/WordPlaceholderWithFormat.java</url>
-          <line>55</line>
-          <option name="timeStamp" value="18" />
+          <line>72</line>
+          <option name="timeStamp" value="32" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
