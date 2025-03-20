@@ -44,7 +44,7 @@ public class WordPlaceholderWithFormat{
         // 原始 .docx 文件路径
         String inputPath = "/Users/Jenius/Desktop/格式测试模版.docx";
         // 输出 .docx 文件路径
-        String outputPath = "/Users/Jenius/Desktop/formation-1.docx";
+        String outputPath = "/Users/Jenius/Desktop/formation.docx";
 
         Path outputPathPath = Paths.get(outputPath);
         if (Files.exists(outputPathPath)) {
@@ -357,6 +357,7 @@ public class WordPlaceholderWithFormat{
         }
         // 把填充后的表格，存储到新doc中
         XWPFTable newTable = newDoc.createTable();
+        newTable.removeRow(0);// 后面copy时会从第一行新增
         copyTable(table,newTable);
     }
 
@@ -375,7 +376,12 @@ public class WordPlaceholderWithFormat{
             newRun.setBold(run.isBold());
             newRun.setItalic(run.isItalic());
             newRun.setUnderline(run.getUnderline());
-            newRun.setFontSize(run.getFontSize());
+            if (null != run.getFontSizeAsDouble()){
+                newRun.setFontSize(run.getFontSize());//这里字号null会导致显示错误
+            }else {
+                newRun.setFontSize(12);
+            }
+
             newRun.setFontFamily(run.getFontFamily());
             newRun.setColor(run.getColor());
         }
@@ -402,5 +408,4 @@ public class WordPlaceholderWithFormat{
             }
         }
     }
-
 }

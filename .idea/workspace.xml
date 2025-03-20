@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="34f2791f-6dd7-4b57-b88b-ac9900eb107d" name="Changes" comment="调整doc处理流程">
+    <list default="true" id="34f2791f-6dd7-4b57-b88b-ac9900eb107d" name="Changes" comment="字体大小异常">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/Utils/WordPlaceholderWithFormat.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Utils/WordPlaceholderWithFormat.java" afterDir="false" />
     </list>
@@ -273,7 +273,15 @@
       <option name="project" value="LOCAL" />
       <updated>1742440118345</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="字体大小异常">
+      <option name="closed" value="true" />
+      <created>1742456231061</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1742456231061</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -314,7 +322,8 @@
     <MESSAGE value="调试表格处理" />
     <MESSAGE value="private 改 public" />
     <MESSAGE value="调整doc处理流程" />
-    <option name="LAST_COMMIT_MESSAGE" value="调整doc处理流程" />
+    <MESSAGE value="字体大小异常" />
+    <option name="LAST_COMMIT_MESSAGE" value="字体大小异常" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -330,9 +339,14 @@
           <option name="timeStamp" value="26" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/apache/poi/poi-ooxml/5.2.4/poi-ooxml-5.2.4.jar!/org/apache/poi/xwpf/usermodel/XWPFRun.class</url>
+          <line>621</line>
+          <option name="timeStamp" value="36" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/Utils/WordPlaceholderWithFormat.java</url>
-          <line>72</line>
-          <option name="timeStamp" value="32" />
+          <line>400</line>
+          <option name="timeStamp" value="43" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
