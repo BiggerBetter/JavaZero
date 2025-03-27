@@ -5,7 +5,33 @@ import java.util.Map;
 
 public class EncodeCode {
     public static void main(String[] args) {
-        String input = "";  // 输入文本
+        String input = " public static List<List<String>> groupLines(String input) {\n" +
+                "        List<List<String>> result = new ArrayList<>();\n" +
+                "        String[] lines = input.split(\"\\\\n\");\n" +
+                "\n" +
+                "        List<String> currentGroup = null;\n" +
+                "        // true 表示当前分组为表格行组；false 表示普通行组；初始值为 null\n" +
+                "        Boolean currentType = null;\n" +
+                "\n" +
+                "        for (String line : lines) {\n" +
+                "            String trimmed = line.trim();\n" +
+                "            if (trimmed.isEmpty()) {\n" +
+                "                // 如果空行，可以选择跳过\n" +
+                "                continue;\n" +
+                "            }\n" +
+                "\n" +
+                "            boolean isTableLine = trimmed.startsWith(\"|\") && trimmed.endsWith(\"|\");\n" +
+                "\n" +
+                "            // 如果当前还没有分组，或当前行与上一个分组类型不一致，则新开一个分组\n" +
+                "            if (currentGroup == null || currentType == null || isTableLine != currentType) {\n" +
+                "                currentGroup = new ArrayList<>();\n" +
+                "                result.add(currentGroup);\n" +
+                "                currentType = isTableLine;\n" +
+                "            }\n" +
+                "            currentGroup.add(trimmed);\n" +
+                "        }\n" +
+                "        return result;\n" +
+                "    }";  // 输入文本
         // System.out.println("原始文本: " + input);
         String encodedText = encode(input);
         System.out.println("编码后的文本: ");

@@ -37,7 +37,10 @@ public class WordPlaceholderWithFormat{
                 "\n|----|----|\n| 手机 | 1001 |\n| 电脑 | 501 |\n " +
                 "我有一个梦想" +
                 "\n| 产品 | 销量 |\n|----|----|\n| 手机 | 1002 |\n| 电脑 | 502 |\n" +
-                "有梦想就会有奇迹");
+                "有梦想就会有奇迹1\n" +
+                "有梦想就会有奇迹2\n" +
+                "有梦想就会有奇迹3\n" +
+                "有梦想就会有奇迹4\n");
     }
 
     public static void main(String[] args) throws IOException {
@@ -236,9 +239,11 @@ public class WordPlaceholderWithFormat{
                 // 如有需要，可在此处对 newTable 设置其他样式
             } else {
                 // 进入文本段落插入逻辑
-                XWPFParagraph newPara = newDoc.createParagraph();
-                XWPFRun run = newPara.createRun();
-                run.setText(String.join("\n",contentBlock).trim());
+                for(String content:contentBlock){
+                    XWPFParagraph newPara = newDoc.createParagraph();
+                    XWPFRun run = newPara.createRun();
+                    run.setText(content.trim());
+                }
             }
         }
     }
