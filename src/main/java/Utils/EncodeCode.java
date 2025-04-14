@@ -5,43 +5,7 @@ import java.util.Map;
 
 public class EncodeCode {
     public static void main(String[] args) {
-        String input = "import java.util.regex.*;\n" +
-                "import java.util.*;\n" +
-                "\n" +
-                "public class HtmlTableParser {\n" +
-                "    public static void main(String[] args) {\n" +
-                "        String html = \"< table > < tr > < td >A< /td > <td>B< /td>< /tr > <tr><td>1</td><td></td></tr> < /table >\";\n" +
-                "\n" +
-                "        // 去除HTML标签中的多余空格\n" +
-                "        html = html.replaceAll(\"<\\\\s*\", \"<\").replaceAll(\"\\\\s*>\", \">\");\n" +
-                "\n" +
-                "        // 匹配表格行\n" +
-                "        Pattern rowPattern = Pattern.compile(\"<tr>(.*?)</tr>\", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);\n" +
-                "        Pattern cellPattern = Pattern.compile(\"<td>(.*?)</td>\", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);\n" +
-                "\n" +
-                "        Matcher rowMatcher = rowPattern.matcher(html);\n" +
-                "        StringBuilder output = new StringBuilder();\n" +
-                "\n" +
-                "        while (rowMatcher.find()) {\n" +
-                "            String rowContent = rowMatcher.group(1);\n" +
-                "            Matcher cellMatcher = cellPattern.matcher(rowContent);\n" +
-                "            List<String> cells = new ArrayList<>();\n" +
-                "\n" +
-                "            while (cellMatcher.find()) {\n" +
-                "                // 去除单元格内的HTML标签与多余空格\n" +
-                "                String cell = cellMatcher.group(1).replaceAll(\"<.*?>\", \"\").trim();\n" +
-                "                cells.add(cell);\n" +
-                "            }\n" +
-                "\n" +
-                "            // 拼接该行\n" +
-                "            output.append(\"| \");\n" +
-                "            output.append(String.join(\" | \", cells));\n" +
-                "            output.append(\" |\\n\");\n" +
-                "        }\n" +
-                "\n" +
-                "        System.out.println(output.toString());\n" +
-                "    }\n" +
-                "}";  // 输入文本
+        String input = "输入要encode的内容";  // 输入文本
         // System.out.println("原始文本: " + input);
         String encodedText = encode(input);
         System.out.println("编码后的文本: ");
