@@ -5,15 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="34f2791f-6dd7-4b57-b88b-ac9900eb107d" name="Changes" comment="新增换行符分段">
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/Utils/PdfHeaderFooterRemover.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/Utils/PdfPageExtractor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/Utils/WordSplitMethod.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Utils/EncodeCode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Utils/EncodeCode.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Utils/WordTemplateEngine.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Utils/WordTemplateFiller.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Utils/WordTemplateProcessor.java" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,34 +30,36 @@
   &quot;associatedIndex&quot;: 1
 }</component>
   <component name="ProjectId" id="2rcLMi3TwmDSWcDD7w2kRfeERy5" />
-  <component name="ProjectLevelVcsManager">
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
     <ConfirmationsSetting value="2" id="Add" />
   </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.EncodeCode.executor&quot;: &quot;Run&quot;,
-    &quot;Application.LineGrouper.executor&quot;: &quot;Run&quot;,
-    &quot;Application.PdfHeaderFooterRemover.executor&quot;: &quot;Run&quot;,
-    &quot;Application.PdfPageExtractor.executor&quot;: &quot;Run&quot;,
-    &quot;Application.WordPlaceholderWithFormat.executor&quot;: &quot;Run&quot;,
-    &quot;Application.WordTemplateEngine.executor&quot;: &quot;Run&quot;,
-    &quot;Application.WordTemplateFiller.executor&quot;: &quot;Debug&quot;,
-    &quot;Application.WordTemplateProcessor.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/Jenius/Pragram/JavaZero&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;editor.preferences.fonts.default&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.EncodeCode.executor": "Run",
+    "Application.LineGrouper.executor": "Run",
+    "Application.PdfHeaderFooterRemover.executor": "Run",
+    "Application.PdfPageExtractor.executor": "Run",
+    "Application.ReportSplitMethod.executor": "Debug",
+    "Application.WordPlaceholderWithFormat.executor": "Run",
+    "Application.WordSplitMethod.executor": "Run",
+    "Application.WordTemplateEngine.executor": "Run",
+    "Application.WordTemplateFiller.executor": "Debug",
+    "Application.WordTemplateProcessor.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "master",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/Jenius/Pragram/JavaZero",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
+    "settings.editor.selected.configurable": "editor.preferences.fonts.default"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src/main/java" />
@@ -73,7 +68,7 @@
       <recent name="Utils" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.EncodeCode">
+  <component name="RunManager" selected="Application.WordSplitMethod">
     <configuration name="EncodeCode" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="Utils.EncodeCode" />
       <module name="javaZero" />
@@ -126,8 +121,8 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="WordTemplateFiller" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="Utils.WordTemplateFiller" />
+    <configuration name="WordSplitMethod" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="Utils.WordSplitMethod" />
       <module name="javaZero" />
       <extension name="coverage">
         <pattern>
@@ -141,11 +136,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.WordSplitMethod" />
         <item itemvalue="Application.EncodeCode" />
         <item itemvalue="Application.PdfPageExtractor" />
         <item itemvalue="Application.PdfHeaderFooterRemover" />
         <item itemvalue="Application.WordPlaceholderWithFormat" />
-        <item itemvalue="Application.WordTemplateFiller" />
       </list>
     </recent_temporary>
   </component>
