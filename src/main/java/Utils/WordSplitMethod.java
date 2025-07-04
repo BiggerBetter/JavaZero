@@ -77,12 +77,6 @@ public class WordSplitMethod {
                 sb.append("| ").append(cell.getText().replaceAll("\n", " ")).append(" ");
             }
             sb.append("|\n");
-            if (i == 0) {
-                for (int j = 0; j < cells.size(); j++) {
-                    sb.append("|---");
-                }
-                sb.append("|\n");
-            }
         }
         return sb.toString();
     }
