@@ -4,9 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="34f2791f-6dd7-4b57-b88b-ac9900eb107d" name="Changes" comment="1">
+    <list default="true" id="34f2791f-6dd7-4b57-b88b-ac9900eb107d" name="Changes" comment="word分章节和提取表格实现咯！">
+      <change afterPath="$PROJECT_DIR$/src/main/java/job/OutlineParser.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Utils/WordSplitMethod.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Utils/WordSplitMethod.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Utils/EncodeCode.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Utils/EncodeCode.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Utils/WordSplitMethod.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/job/WordSplitMethod.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,9 +43,11 @@
   "keyToString": {
     "Application.EncodeCode.executor": "Run",
     "Application.LineGrouper.executor": "Run",
+    "Application.OutlineParser.executor": "Run",
     "Application.PdfHeaderFooterRemover.executor": "Run",
     "Application.PdfPageExtractor.executor": "Run",
     "Application.ReportSplitMethod.executor": "Debug",
+    "Application.TitleParserDemo.executor": "Run",
     "Application.WordPlaceholderWithFormat.executor": "Run",
     "Application.WordSplitMethod.executor": "Run",
     "Application.WordTemplateEngine.executor": "Run",
@@ -68,13 +72,13 @@
       <recent name="Utils" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.WordSplitMethod">
+  <component name="RunManager" selected="Application.OutlineParser">
     <configuration name="EncodeCode" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="Utils.EncodeCode" />
       <module name="javaZero" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="Utils.*" />
+          <option name="PATTERN" value="job.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
@@ -82,12 +86,12 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="PdfHeaderFooterRemover" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="Utils.PdfHeaderFooterRemover" />
+    <configuration name="OutlineParser" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="job.OutlineParser" />
       <module name="javaZero" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="Utils.*" />
+          <option name="PATTERN" value="job.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
@@ -100,7 +104,7 @@
       <module name="javaZero" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="Utils.*" />
+          <option name="PATTERN" value="job.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
@@ -108,12 +112,12 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="WordPlaceholderWithFormat" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="Utils.WordPlaceholderWithFormat" />
+    <configuration name="TitleParserDemo" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="job.TitleParserDemo" />
       <module name="javaZero" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="Utils.*" />
+          <option name="PATTERN" value="job.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
@@ -122,11 +126,11 @@
       </method>
     </configuration>
     <configuration name="WordSplitMethod" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="Utils.WordSplitMethod" />
+      <option name="MAIN_CLASS_NAME" value="job.WordSplitMethod" />
       <module name="javaZero" />
       <extension name="coverage">
         <pattern>
-          <option name="PATTERN" value="Utils.*" />
+          <option name="PATTERN" value="job.*" />
           <option name="ENABLED" value="true" />
         </pattern>
       </extension>
@@ -136,11 +140,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.WordSplitMethod" />
+        <item itemvalue="Application.OutlineParser" />
+        <item itemvalue="Application.TitleParserDemo" />
         <item itemvalue="Application.EncodeCode" />
+        <item itemvalue="Application.WordSplitMethod" />
         <item itemvalue="Application.PdfPageExtractor" />
-        <item itemvalue="Application.PdfHeaderFooterRemover" />
-        <item itemvalue="Application.WordPlaceholderWithFormat" />
       </list>
     </recent_temporary>
   </component>
@@ -329,7 +333,15 @@
       <option name="project" value="LOCAL" />
       <updated>1751614706159</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="word分章节和提取表格实现咯！">
+      <option name="closed" value="true" />
+      <created>1751616599486</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1751616599486</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -375,7 +387,8 @@
     <MESSAGE value="新增换行符分段" />
     <MESSAGE value="准备实现合并的表格展开" />
     <MESSAGE value="1" />
-    <option name="LAST_COMMIT_MESSAGE" value="1" />
+    <MESSAGE value="word分章节和提取表格实现咯！" />
+    <option name="LAST_COMMIT_MESSAGE" value="word分章节和提取表格实现咯！" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
