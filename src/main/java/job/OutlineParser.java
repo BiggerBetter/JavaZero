@@ -48,8 +48,6 @@ public class OutlineParser {
      * @throws IOException
      */
     public static List<String> extractWord(String filePath) throws IOException {
-        // Map<String, List<String>> sectionMap = new LinkedHashMap<>();
-        // String currentSection = null;
         List<String> lines = new ArrayList<>();
         try (FileInputStream fis = new FileInputStream(filePath);
              XWPFDocument document = new XWPFDocument(fis)) {
@@ -71,8 +69,6 @@ public class OutlineParser {
                         continue;
                     }
                     lines.add(text);
-                    lines.add(text);
-
                 } else if (element.getElementType() == BodyElementType.TABLE ) {
                     XWPFTable table = (XWPFTable) element;
                     // 拿到表格后，如果当前有积累段落内容，就将表格形成的文本追加进去
@@ -236,7 +232,7 @@ public class OutlineParser {
     // 构造节点并补全 key
     private static Node createNode(int level, String rawNumber, String title,
                                    String numberKey, Node parent) {
-        String fullNumKey = parent.fullNumberKey + numberKey;
+        String fullNumKey = parent.fullNumberKey + "/"+ numberKey;
         String contentKey = parent.level == 0 ? title
                 : parent.contentKey + "-" + title;
         return new Node(level, rawNumber, title, numberKey, fullNumKey, contentKey);
@@ -245,8 +241,7 @@ public class OutlineParser {
     // ────── 遍历输出（深度优先，含正文）──────
     public static void printTree(Node node, String indent) {
         if (node.level != 0) { // 跳过虚根
-            System.out.printf("%s[%s]  %s%n",
-                    indent, node.fullNumberKey, node.contentKey);
+            System.out.printf("%s[%s] -- [%s]%n", indent, "标题序号Key："+node.fullNumberKey, "标题内容Key："+node.contentKey);
             for (String body : node.contents) {
                 System.out.printf("%s    └─ %s%n", indent, body);
             }
@@ -259,18 +254,21 @@ public class OutlineParser {
     // ────── 示例 Main ──────
     public static void main(String[] args) throws IOException {
         List<String> sample = Arrays.asList(
-                "附件1",
-                "关注信息",
-                "一、授信申请方案1",
+                "一、授信申请方案",
                 "（一）基本情况",
                 "1. 贷款主体",
                 "贷款主体为 XX 有限公司，成立于……",
+                "贷款申请人为 XX ，出生于……",
+                "贷款时间为 XXxx",
                 "2. 担保方案",
-                "担保人：YY 实业…",
+                "担保人1：YY 实业…",
+                "担保人2：ZZ 实业…",
                 "（二）上年度批复情况",
                 "1. 批复额度",
+                "2023 年批复总额为……",
                 "2024 年批复总额为……",
                 "2. 实际使用余额",
+                "截至 2025-05-30 使用余额……",
                 "截至 2025-06-30 使用余额……",
                 "二、风险评估",
                 "（一）行业分析",
@@ -281,7 +279,10 @@ public class OutlineParser {
         );
 
         String filePath = "/Users/Jenius/Desktop/分段测试.docx";
-        sample = extractWord(filePath);
+        // sample = extractWord(filePath);
+        // for (String tmp :sample){
+        //     System.out.println(tmp);
+        // }
         Node root = parse(sample);
 
         printTree(root, "");
