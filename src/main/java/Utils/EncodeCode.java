@@ -43,7 +43,7 @@ public class EncodeCode {
 
         // 大写字母映射
         map.put('A', "嗄"); map.put('B', "班"); map.put('C', "草"); map.put('D', "东");
-        map.put('E', "额"); map.put('F', "风"); map.put('G', "广"); map.put('H', "海");
+        map.put('E', "苊"); map.put('F', "唪"); map.put('G', "广"); map.put('H', "海");
         map.put('I', "翼"); map.put('J', "金"); map.put('K', "科"); map.put('L', "蓝");
         map.put('M', "明"); map.put('N', "南"); map.put('O', "欧"); map.put('P', "派");
         map.put('Q', "群"); map.put('R', "驲"); map.put('S', "膳"); map.put('T', "兲");

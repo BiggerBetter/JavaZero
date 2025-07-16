@@ -201,7 +201,7 @@ public class OutlineParser {
 
             if (m1.find()) {                 // 一级
                 currentL1 = createNode(1, m1.group(1) + "、", m1.group(2),
-                        m1.group(1), root);
+                        m1.group(1)+ "、", root);
                 root.children.add(currentL1);
                 currentL2 = currentL3 = null;
             } else if (m2.find()) {          // 二级
@@ -215,7 +215,7 @@ public class OutlineParser {
                 if (currentL2 == null) continue;
                 String numKey = m3.group(1); // 去掉点号
                 currentL3 = createNode(3, m3.group(1) + ".", m3.group(2),
-                        numKey, currentL2);
+                        numKey+ ".", currentL2);
                 currentL2.children.add(currentL3);
             } else {                         // 正文
                 // 归到最近的标题节点；如果三级存在，就放三级；否则二级，再否则一级
@@ -250,6 +250,48 @@ public class OutlineParser {
             printTree(child, indent + "    ");
         }
     }
+
+    /** ==== 1) 递归查找：根据 contentKey 精确匹配 ==== */
+    public static Node findByContentKey(Node node, String key) {
+        if (key.equals(node.contentKey)) return node;
+        for (Node child : node.children) {
+            Node hit = findByContentKey(child, key);
+            if (hit != null) return hit;
+        }
+        return null;    // 未找到
+    }
+
+    /** ==== 2) 提取并还原整段文本（含标题与正文） ==== */
+    public static List<String> extractSection(Node root, String contentKey) {
+        Node target = findByContentKey(root, contentKey);
+        if (target == null) return Collections.emptyList();
+
+        List<String> lines = new ArrayList<>();
+        buildLines(target, 0, lines);      // 从目标节点向下收集
+        return lines;
+    }
+
+    /** 辅助：递归组装“标题行 + 正文行”，并做缩进 */
+    private static void buildLines(Node node, int indentLv, List<String> out) {
+        if (node.level != 0) {             // 虚根除外
+            String indent = repeat("    ", indentLv);   // 4 空格 / 级
+            out.add(indent + node.rawNumber + " " + node.title);
+            for (String para : node.contents) {
+                out.add(indent + "    " + para);        // 正文再缩一层
+            }
+        }
+        for (Node child : node.children) {
+            buildLines(child, indentLv + 1, out);
+        }
+    }
+
+    /** 简易 String repeat（兼容 Java 8） */
+    private static String repeat(String s, int times) {
+        StringBuilder sb = new StringBuilder(s.length() * times);
+        for (int i = 0; i < times; i++) sb.append(s);
+        return sb.toString();
+    }
+
 
     // ────── 示例 Main ──────
     public static void main(String[] args) throws IOException {
@@ -286,5 +328,12 @@ public class OutlineParser {
         Node root = parse(sample);
 
         printTree(root, "");
+
+        String key = "授信申请方案-上年度批复情况";          // 也可以用 "授信申请方案"
+        List<String> section = extractSection(root, key);
+
+        // ③ 打印查看
+        System.out.println("\n===== 提取结果 =====");
+        for (String line : section) System.out.println(line);
     }
 }
