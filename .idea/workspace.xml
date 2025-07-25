@@ -4,10 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="34f2791f-6dd7-4b57-b88b-ac9900eb107d" name="Changes" comment="结构化为树结构没问题了">
+    <list default="true" id="34f2791f-6dd7-4b57-b88b-ac9900eb107d" name="Changes" comment="代码有问题啊啊啊啊">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/job/OutlineParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/job/OutlineParser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/job/授信-报告.docx" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/job/授信-报告.docx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/job/授信-模版.docx" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/job/授信-模版.docx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,6 +67,7 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/main/java/job" />
       <recent name="$PROJECT_DIR$/src/main/java" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
@@ -382,7 +384,15 @@
       <option name="project" value="LOCAL" />
       <updated>1752631354464</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="代码有问题啊啊啊啊">
+      <option name="closed" value="true" />
+      <created>1753436514621</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1753436514621</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -431,7 +441,8 @@
     <MESSAGE value="word分章节和提取表格实现咯！" />
     <MESSAGE value="提交" />
     <MESSAGE value="结构化为树结构没问题了" />
-    <option name="LAST_COMMIT_MESSAGE" value="结构化为树结构没问题了" />
+    <MESSAGE value="代码有问题啊啊啊啊" />
+    <option name="LAST_COMMIT_MESSAGE" value="代码有问题啊啊啊啊" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -453,13 +464,8 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/job/OutlineParser.java</url>
-          <line>408</line>
-          <option name="timeStamp" value="46" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/job/OutlineParser.java</url>
-          <line>394</line>
-          <option name="timeStamp" value="48" />
+          <line>478</line>
+          <option name="timeStamp" value="49" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

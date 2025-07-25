@@ -386,12 +386,43 @@ public class OutlineParser {
         }
     }
 
+    /** 工具：判断行是否能匹配任一层 PATTERN（即真假标题）。*/
+    private static boolean matchesAnyPattern(String line) {
+        for (Pattern p : OutlineParser.PATTERNS) {
+            if (p.matcher(line).find()) return true;
+        }
+        return false;
+    }
+
+
     /** ===== 高阶 API：传入【模版行】+【报告行】→ 得到已校正的报告树 ===== */
     public static Node parseReportWithTemplate(List<String> templateLines,
                                                List<String> reportLines) {
         Map<String, String> tmplNumMap = buildTemplateNumberMap(templateLines);
-        Node reportRoot = parse(reportLines);
+        // 先把报告行做“补编号”：凡是没匹配任何 PATTERN、但文字正好出现在模版 key 里，
+        // 则强行用模版编号前缀，形如 "1. 批复额度" 或 "（二） 上年度批复情况"
+        List<String> patchedLines = new ArrayList<>();
+        for (String ln : reportLines) {
+            if (matchesAnyPattern(ln)) {
+                patchedLines.add(ln);                 // 本来就有合规编号
+            } else {
+                String stdNum = tmplNumMap.get(ln.trim());
+                if (stdNum != null) {
+                    // 判断 stdNum 形态：有 "、"、"（"、"." 来决定拼接空格
+                    String merged;
+                    if (stdNum.endsWith("、") || stdNum.endsWith(".")) {
+                        merged = stdNum + " " + ln.trim();     // 一、  / 1.
+                    } else {
+                        merged = stdNum + " " + ln.trim();     // （一）
+                    }
+                    patchedLines.add(merged);
+                } else {
+                    patchedLines.add(ln);             // 正文或未知行
+                }
+            }
+        }
 
+        Node reportRoot = parse(patchedLines);        // 用补全后的行再跑解析
         applyTemplateNumbers(reportRoot, tmplNumMap);
         rebuildFullKeys(reportRoot, "");
         return reportRoot;
@@ -400,8 +431,8 @@ public class OutlineParser {
     // ────── 示例 Main ──────
     public static void main(String[] args) throws IOException {
         // ====== 演示：模版 & 报告 双解析 ======
-        String templatePath = "/Users/Jenius/Desktop/授信-模版.docx";
-        String reportPath   = "/Users/Jenius/Desktop/授信-报告.docx";
+        String templatePath = "/Users/Jenius/Desktop/JavaZero/src/main/java/job/授信-模版.docx";
+        String reportPath   = "/Users/Jenius/Desktop/JavaZero/src/main/java/job/授信-报告.docx";
 
         List<String> tmplLines   = extractWord(templatePath);
         List<String> reportLines = extractWord(reportPath);
@@ -419,4 +450,6 @@ public class OutlineParser {
         System.out.println("\n===== 提取结果 =====");
         for (String line : section) System.out.println(line);
     }
+
 }
+
