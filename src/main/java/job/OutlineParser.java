@@ -36,10 +36,22 @@ public class OutlineParser {
         }
     }
 
-    // ────── 正则（全角“一、”“（一）”；半角“1.”）──────
-    private static final Pattern P_L1 = Pattern.compile("^([一二三四五六七八九十]+)、\\s*(.+)$");
-    private static final Pattern P_L2 = Pattern.compile("^（([一二三四五六七八九十]+)）\\s*(.+)$");
-    private static final Pattern P_L3 = Pattern.compile("^([0-9]+)\\.\\s*(.+)$");
+    /** 按层级（高→低）排列的编号正则。调用方可 setPatterns(...) 覆盖自定义。*/
+    private static List<Pattern> PATTERNS = new ArrayList<>(Arrays.asList(
+            // 一级：  一、
+            Pattern.compile("^([一二三四五六七八九十]+)、\\s*(.+)$"),
+            // 二级：  （一）
+            Pattern.compile("^（([一二三四五六七八九十]+)）\\s*(.+)$"),
+            // 三级：  1.
+            Pattern.compile("^([0-9]+)\\.\\s*(.+)$"),
+            // 四级：  （1）
+            Pattern.compile("^（([0-9]+)）\\s*(.+)$")
+    ));
+
+    /** 允许调用方按需替换（支持不同模版） */
+    public static void setPatterns(List<Pattern> patterns) {
+        PATTERNS = patterns;
+    }
 
     /**
      * 从目标路径的文档中提取段落
@@ -63,7 +75,7 @@ public class OutlineParser {
                     if (text.isEmpty()) continue;
 
                     //判断报告文档正文是否开始，一般以一、开始
-                    if (!isReportStarted && P_L1.matcher(text).matches()){
+                    if (!isReportStarted && PATTERNS.get(0).matcher(text).matches()){
                         isReportStarted = true;
                     }else if (!isReportStarted){
                         continue;
@@ -187,42 +199,56 @@ public class OutlineParser {
     // 解析入口
     public static Node parse(List<String> lines) {
         Node root = new Node(0, "", "ROOT", "", "", ""); // 虚根
-        Node currentL1 = null;
-        Node currentL2 = null;
-        Node currentL3 = null;
+        Node[] currents = new Node[PATTERNS.size()];   // 按层索引缓存最近节点
 
         for (String line : lines) {
             line = line.trim();
             if (line.isEmpty()) continue;
 
-            Matcher m1 = P_L1.matcher(line);
-            Matcher m2 = P_L2.matcher(line);
-            Matcher m3 = P_L3.matcher(line);
+            int hitLevel = -1;
+            Matcher hitMatcher = null;
 
-            if (m1.find()) {                 // 一级
-                currentL1 = createNode(1, m1.group(1) + "、", m1.group(2),
-                        m1.group(1)+ "、", root);
-                root.children.add(currentL1);
-                currentL2 = currentL3 = null;
-            } else if (m2.find()) {          // 二级
-                if (currentL1 == null) continue; // 容错：忽略孤儿
-                String numKey = "（" + m2.group(1) + "）";
-                currentL2 = createNode(2, numKey, m2.group(2),
-                        numKey, currentL1);
-                currentL1.children.add(currentL2);
-                currentL3 = null;
-            } else if (m3.find()) {          // 三级
-                if (currentL2 == null) continue;
-                String numKey = m3.group(1); // 去掉点号
-                currentL3 = createNode(3, m3.group(1) + ".", m3.group(2),
-                        numKey+ ".", currentL2);
-                currentL2.children.add(currentL3);
-            } else {                         // 正文
-                // 归到最近的标题节点；如果三级存在，就放三级；否则二级，再否则一级
-                Node target = currentL3 != null ? currentL3
-                        : currentL2 != null ? currentL2
-                        : currentL1 != null ? currentL1
-                        : root;
+            // ① 判定命中层级
+            for (int i = 0; i < PATTERNS.size(); i++) {
+                Matcher m = PATTERNS.get(i).matcher(line);
+                if (m.find()) {
+                    hitLevel = i + 1;          // 层级 = 索引 + 1
+                    hitMatcher = m;
+                    break;
+                }
+            }
+
+            if (hitLevel > 0) {               // 命中了标题
+                // ② 取编号 & 标题文字
+                String numPart = hitMatcher.group(1);
+                String titlePart = hitMatcher.group(2).trim();
+
+                String rawNumber, numberKey;
+                switch (hitLevel) {
+                    case 1:  rawNumber = numPart + "、";          numberKey = rawNumber; break;
+                    case 2:  rawNumber = "（" + numPart + "）";    numberKey = rawNumber; break;
+                    case 3:  rawNumber = numPart + ".";           numberKey = rawNumber; break;
+                    default: rawNumber = "（" + numPart + "）";    numberKey = rawNumber; break; // 四级及以后：沿用括号形式
+                }
+
+                // ③ 生成节点
+                Node parent = (hitLevel == 1) ? root : currents[hitLevel - 2];
+                if (parent == null) parent = root;   // 容错：孤儿标题归根
+                Node node = createNode(hitLevel, rawNumber, titlePart, numberKey, parent);
+                parent.children.add(node);
+
+                // ④ 维护 currents[]
+                currents[hitLevel - 1] = node;
+                for (int i = hitLevel; i < currents.length; i++) currents[i] = null;
+
+            } else {                        // 正文：归到最近的非空 currents
+                Node target = root;
+                for (int i = currents.length - 1; i >= 0; i--) {
+                    if (currents[i] != null) {
+                        target = currents[i];
+                        break;
+                    }
+                }
                 target.contents.add(line);
             }
         }
@@ -232,7 +258,9 @@ public class OutlineParser {
     // 构造节点并补全 key
     private static Node createNode(int level, String rawNumber, String title,
                                    String numberKey, Node parent) {
-        String fullNumKey = parent.fullNumberKey + "/"+ numberKey;
+        String fullNumKey = parent.fullNumberKey.isEmpty()
+                ? numberKey
+                : parent.fullNumberKey + "-" + numberKey;
         String contentKey = parent.level == 0 ? title
                 : parent.contentKey + "-" + title;
         return new Node(level, rawNumber, title, numberKey, fullNumKey, contentKey);
@@ -292,47 +320,102 @@ public class OutlineParser {
         return sb.toString();
     }
 
+    public static Map<String, List<String>> buildTitleToNumberMap(Node root) {
+        Map<String, List<String>> map = new LinkedHashMap<>();
+        traverseAndCollect(root, map);
+        return map;
+    }
+
+    private static void traverseAndCollect(Node node, Map<String, List<String>> map) {
+        if (node.level != 0) {
+            List<String> list = map.get(node.contentKey);
+            if (list == null) {
+                list = new ArrayList<>();
+                map.put(node.contentKey, list);
+            }
+            list.add(node.rawNumber);
+        }
+        for (Node child : node.children) {
+            traverseAndCollect(child, map);
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────
+    //  模版 → 报告：编号校正辅助
+    // ──────────────────────────────────────────────────────────
+
+    /** 1) 由模版行构造『contentKey → 标准编号』映射（每个标题取第一个编号）。*/
+    public static Map<String, String> buildTemplateNumberMap(List<String> templateLines) {
+        Node tmplRoot = parse(templateLines);
+        Map<String, List<String>> tmp = buildTitleToNumberMap(tmplRoot);
+
+        Map<String, String> map = new LinkedHashMap<>();
+        for (Map.Entry<String, List<String>> e : tmp.entrySet()) {
+            if (!e.getValue().isEmpty()) {
+                map.put(e.getKey(), e.getValue().get(0));   // 取首编号为权威值
+            }
+        }
+        return map;
+    }
+
+    /** 2) 递归套用模版编号到报告树，若不一致则改写为模版值。*/
+    private static void applyTemplateNumbers(Node node, Map<String, String> tmplNumMap) {
+        if (node.level != 0) {
+            String stdNum = tmplNumMap.get(node.contentKey);
+            if (stdNum != null && !stdNum.equals(node.rawNumber)) {
+                node.rawNumber = stdNum;
+                node.numberKey = stdNum;
+            }
+        }
+        for (Node child : node.children) {
+            applyTemplateNumbers(child, tmplNumMap);
+        }
+    }
+
+    /** 3) 校正后需重建 fullNumberKey，保持父子连贯。*/
+    private static void rebuildFullKeys(Node node, String parentKey) {
+        if (node.level == 0) {
+            node.fullNumberKey = "";
+        } else {
+            node.fullNumberKey = parentKey.isEmpty()
+                    ? node.numberKey
+                    : parentKey + "-" + node.numberKey;
+        }
+        for (Node ch : node.children) {
+            rebuildFullKeys(ch, node.fullNumberKey);
+        }
+    }
+
+    /** ===== 高阶 API：传入【模版行】+【报告行】→ 得到已校正的报告树 ===== */
+    public static Node parseReportWithTemplate(List<String> templateLines,
+                                               List<String> reportLines) {
+        Map<String, String> tmplNumMap = buildTemplateNumberMap(templateLines);
+        Node reportRoot = parse(reportLines);
+
+        applyTemplateNumbers(reportRoot, tmplNumMap);
+        rebuildFullKeys(reportRoot, "");
+        return reportRoot;
+    }
 
     // ────── 示例 Main ──────
     public static void main(String[] args) throws IOException {
-        List<String> sample = Arrays.asList(
-                "一、授信申请方案",
-                "（一）基本情况",
-                "1. 贷款主体",
-                "贷款主体为 XX 有限公司，成立于……",
-                "贷款申请人为 XX ，出生于……",
-                "贷款时间为 XXxx",
-                "2. 担保方案",
-                "担保人1：YY 实业…",
-                "担保人2：ZZ 实业…",
-                "（二）上年度批复情况",
-                "1. 批复额度",
-                "2023 年批复总额为……",
-                "2024 年批复总额为……",
-                "2. 实际使用余额",
-                "截至 2025-05-30 使用余额……",
-                "截至 2025-06-30 使用余额……",
-                "二、风险评估",
-                "（一）行业分析",
-                "1. 行业趋势",
-                "行业整体增长…",
-                "2. 政策影响",
-                "最新政策……"
-        );
+        // ====== 演示：模版 & 报告 双解析 ======
+        String templatePath = "/Users/Jenius/Desktop/授信-模版.docx";
+        String reportPath   = "/Users/Jenius/Desktop/授信-报告.docx";
 
-        String filePath = "/Users/Jenius/Desktop/分段测试.docx";
-        // sample = extractWord(filePath);
-        // for (String tmp :sample){
-        //     System.out.println(tmp);
-        // }
-        Node root = parse(sample);
+        List<String> tmplLines   = extractWord(templatePath);
+        List<String> reportLines = extractWord(reportPath);
 
-        printTree(root, "");
+        Node reportRoot = parseReportWithTemplate(tmplLines, reportLines);
 
-        String key = "授信申请方案-上年度批复情况";          // 也可以用 "授信申请方案"
-        List<String> section = extractSection(root, key);
+        // 打印校正后大纲
+        System.out.println("===== 纠正后大纲 =====");
+        printTree(reportRoot, "");
 
-        // ③ 打印查看
+        // 按需提取
+        String key = "授信申请方案-上年度批复情况";
+        List<String> section = extractSection(reportRoot, key);
+
         System.out.println("\n===== 提取结果 =====");
         for (String line : section) System.out.println(line);
     }
