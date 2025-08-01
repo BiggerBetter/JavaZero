@@ -1,4 +1,5 @@
 package job;
+
 import org.apache.poi.xwpf.usermodel.*;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTVMerge;
 
@@ -36,7 +37,9 @@ public class OutlineParser {
         }
     }
 
-    /** 按层级（高→低）排列的编号正则。调用方可 setPatterns(...) 覆盖自定义。*/
+    /**
+     * 按层级（高→低）排列的编号正则。调用方可 setPatterns(...) 覆盖自定义。
+     */
     private static List<Pattern> PATTERNS = new ArrayList<>(Arrays.asList(
             // 一级：  一、
             Pattern.compile("^([一二三四五六七八九十]+)、\\s*(.+)$"),
@@ -48,13 +51,16 @@ public class OutlineParser {
             Pattern.compile("^（([0-9]+)）\\s*(.+)$")
     ));
 
-    /** 允许调用方按需替换（支持不同模版） */
+    /**
+     * 允许调用方按需替换（支持不同模版）
+     */
     public static void setPatterns(List<Pattern> patterns) {
         PATTERNS = patterns;
     }
 
     /**
      * 从目标路径的文档中提取段落
+     *
      * @param filePath
      * @return
      * @throws IOException
@@ -66,7 +72,7 @@ public class OutlineParser {
 
             boolean isReportStarted = false;
 
-            //遍历文档中的所有元素，对表格抽取内容，对段落抽取分段标记
+            // 遍历文档中的所有元素，对表格抽取内容，对段落抽取分段标记
             List<IBodyElement> bodyElements = document.getBodyElements();
             for (IBodyElement element : bodyElements) {
                 if (element.getElementType() == BodyElementType.PARAGRAPH) {
@@ -74,14 +80,14 @@ public class OutlineParser {
                     String text = para.getText().trim();
                     if (text.isEmpty()) continue;
 
-                    //判断报告文档正文是否开始，一般以一、开始
-                    if (!isReportStarted && PATTERNS.get(0).matcher(text).matches()){
+                    // 判断报告文档正文是否开始，一般以一、开始
+                    if (!isReportStarted && PATTERNS.get(0).matcher(text).matches()) {
                         isReportStarted = true;
-                    }else if (!isReportStarted){
+                    } else if (!isReportStarted) {
                         continue;
                     }
                     lines.add(text);
-                } else if (element.getElementType() == BodyElementType.TABLE ) {
+                } else if (element.getElementType() == BodyElementType.TABLE) {
                     XWPFTable table = (XWPFTable) element;
                     // 拿到表格后，如果当前有积累段落内容，就将表格形成的文本追加进去
                     lines.add(parseTableToMarkdown(table));
@@ -196,65 +202,20 @@ public class OutlineParser {
         return sb.toString();
     }
 
-    // 解析入口
-    public static Node parse(List<String> lines) {
-        Node root = new Node(0, "", "ROOT", "", "", ""); // 虚根
-        Node[] currents = new Node[PATTERNS.size()];   // 按层索引缓存最近节点
 
-        for (String line : lines) {
-            line = line.trim();
-            if (line.isEmpty()) continue;
 
-            int hitLevel = -1;
-            Matcher hitMatcher = null;
-
-            // ① 判定命中层级
-            for (int i = 0; i < PATTERNS.size(); i++) {
-                Matcher m = PATTERNS.get(i).matcher(line);
-                if (m.find()) {
-                    hitLevel = i + 1;          // 层级 = 索引 + 1
-                    hitMatcher = m;
-                    break;
-                }
-            }
-
-            if (hitLevel > 0) {               // 命中了标题
-                // ② 取编号 & 标题文字
-                String numPart = hitMatcher.group(1);
-                String titlePart = hitMatcher.group(2).trim();
-
-                String rawNumber, numberKey;
-                switch (hitLevel) {
-                    case 1:  rawNumber = numPart + "、";          numberKey = rawNumber; break;
-                    case 2:  rawNumber = "（" + numPart + "）";    numberKey = rawNumber; break;
-                    case 3:  rawNumber = numPart + ".";           numberKey = rawNumber; break;
-                    default: rawNumber = "（" + numPart + "）";    numberKey = rawNumber; break; // 四级及以后：沿用括号形式
-                }
-
-                // ③ 生成节点
-                Node parent = (hitLevel == 1) ? root : currents[hitLevel - 2];
-                if (parent == null) parent = root;   // 容错：孤儿标题归根
-                Node node = createNode(hitLevel, rawNumber, titlePart, numberKey, parent);
-                parent.children.add(node);
-
-                // ④ 维护 currents[]
-                currents[hitLevel - 1] = node;
-                for (int i = hitLevel; i < currents.length; i++) currents[i] = null;
-
-            } else {                        // 正文：归到最近的非空 currents
-                Node target = root;
-                for (int i = currents.length - 1; i >= 0; i--) {
-                    if (currents[i] != null) {
-                        target = currents[i];
-                        break;
-                    }
-                }
-                target.contents.add(line);
+    private static Node getCurrent(Node[] currents) {
+        Node target = null;
+        for (int i = currents.length - 1; i >= 0; i--) {
+            if (currents[i] != null) {
+                target = currents[i];
+                break;
             }
         }
-        return root;
+        return target;
     }
-public static Node parseWithReference(List<String> lines, Map<String,String> numMap) {
+
+    public static Node parse(List<String> lines, Map<String, String> numMap) {
         Node root = new Node(0, "", "ROOT", "", "", ""); // 虚根
         Node[] currents = new Node[PATTERNS.size()];   // 按层索引缓存最近节点
 
@@ -264,6 +225,30 @@ public static Node parseWithReference(List<String> lines, Map<String,String> num
 
             int hitLevel = -1;
             Matcher hitMatcher = null;
+
+            // 参考模版解析 parseWithReference
+            if (!numMap.isEmpty()) {
+
+                String tmpHead = "";
+                String modifiedLine = line;
+
+
+                if (numMap.containsKey(line)) {
+                    modifiedLine = numMap.get(line) + line;
+                }
+
+                for (int i = currents.length - 1; i >= 0; i--) {
+                    if (currents[i] != null) {
+                        Node tmpNode = currents[i];
+                        tmpHead = tmpNode.contentKey + "-" + line;
+                        String bianhao = numMap.get(tmpHead);
+                        if (bianhao != null) {
+                            modifiedLine = bianhao + line;
+                        }
+                    }
+                }
+                line = modifiedLine;
+            }
 
             // ① 判定命中层级
             for (int i = 0; i < PATTERNS.size(); i++) {
@@ -282,10 +267,22 @@ public static Node parseWithReference(List<String> lines, Map<String,String> num
 
                 String rawNumber, numberKey;
                 switch (hitLevel) {
-                    case 1:  rawNumber = numPart + "、";          numberKey = rawNumber; break;
-                    case 2:  rawNumber = "（" + numPart + "）";    numberKey = rawNumber; break;
-                    case 3:  rawNumber = numPart + ".";           numberKey = rawNumber; break;
-                    default: rawNumber = "（" + numPart + "）";    numberKey = rawNumber; break; // 四级及以后：沿用括号形式
+                    case 1:
+                        rawNumber = numPart + "、";
+                        numberKey = rawNumber;
+                        break;
+                    case 2:
+                        rawNumber = "（" + numPart + "）";
+                        numberKey = rawNumber;
+                        break;
+                    case 3:
+                        rawNumber = numPart + ".";
+                        numberKey = rawNumber;
+                        break;
+                    default:
+                        rawNumber = "（" + numPart + "）";
+                        numberKey = rawNumber;
+                        break; // 四级及以后：沿用括号形式
                 }
 
                 // ③ 生成节点
@@ -326,7 +323,7 @@ public static Node parseWithReference(List<String> lines, Map<String,String> num
     // ────── 遍历输出（深度优先，含正文）──────
     public static void printTree(Node node, String indent) {
         if (node.level != 0) { // 跳过虚根
-            System.out.printf("%s[%s] -- [%s]%n", indent, "标题序号Key："+node.fullNumberKey, "标题内容Key："+node.contentKey);
+            System.out.printf("%s[%s] -- [%s]%n", indent, "标题序号Key：" + node.fullNumberKey, "标题内容Key：" + node.contentKey);
             for (String body : node.contents) {
                 System.out.printf("%s    └─ %s%n", indent, body);
             }
@@ -336,7 +333,9 @@ public static Node parseWithReference(List<String> lines, Map<String,String> num
         }
     }
 
-    /** ==== 1) 递归查找：根据 contentKey 精确匹配 ==== */
+    /**
+     * ==== 1) 递归查找：根据 contentKey 精确匹配 ====
+     */
     public static Node findByContentKey(Node node, String key) {
         if (key.equals(node.contentKey)) return node;
         for (Node child : node.children) {
@@ -346,7 +345,9 @@ public static Node parseWithReference(List<String> lines, Map<String,String> num
         return null;    // 未找到
     }
 
-    /** ==== 2) 提取并还原整段文本（含标题与正文） ==== */
+    /**
+     * ==== 2) 提取并还原整段文本（含标题与正文） ====
+     */
     public static List<String> extractSection(Node root, String contentKey) {
         Node target = findByContentKey(root, contentKey);
         if (target == null) return Collections.emptyList();
@@ -356,7 +357,9 @@ public static Node parseWithReference(List<String> lines, Map<String,String> num
         return lines;
     }
 
-    /** 辅助：递归组装“标题行 + 正文行”，并做缩进 */
+    /**
+     * 辅助：递归组装“标题行 + 正文行”，并做缩进
+     */
     private static void buildLines(Node node, int indentLv, List<String> out) {
         if (node.level != 0) {             // 虚根除外
             String indent = repeat("    ", indentLv);   // 4 空格 / 级
@@ -370,7 +373,9 @@ public static Node parseWithReference(List<String> lines, Map<String,String> num
         }
     }
 
-    /** 简易 String repeat（兼容 Java 8） */
+    /**
+     * 简易 String repeat（兼容 Java 8）
+     */
     private static String repeat(String s, int times) {
         StringBuilder sb = new StringBuilder(s.length() * times);
         for (int i = 0; i < times; i++) sb.append(s);
@@ -401,9 +406,11 @@ public static Node parseWithReference(List<String> lines, Map<String,String> num
     //  模版 → 报告：编号校正辅助
     // ──────────────────────────────────────────────────────────
 
-    /** 1) 由模版行构造『contentKey → 标准编号』映射（每个标题取第一个编号）。*/
+    /**
+     * 1) 由模版行构造『contentKey → 标准编号』映射（每个标题取第一个编号）。
+     */
     public static Map<String, String> buildTemplateNumberMap(List<String> templateLines) {
-        Node tmplRoot = parse(templateLines);
+        Node tmplRoot = parse(templateLines, new HashMap<>());
         Map<String, List<String>> tmp = buildTitleToNumberMap(tmplRoot);
 
         Map<String, String> map = new LinkedHashMap<>();
@@ -415,7 +422,9 @@ public static Node parseWithReference(List<String> lines, Map<String,String> num
         return map;
     }
 
-    /** 2) 递归套用模版编号到报告树，若不一致则改写为模版值。*/
+    /**
+     * 2) 递归套用模版编号到报告树，若不一致则改写为模版值。
+     */
     private static void applyTemplateNumbers(Node node, Map<String, String> tmplNumMap) {
         if (node.level != 0) {
             String stdNum = tmplNumMap.get(node.contentKey);
@@ -429,7 +438,9 @@ public static Node parseWithReference(List<String> lines, Map<String,String> num
         }
     }
 
-    /** 3) 校正后需重建 fullNumberKey，保持父子连贯。*/
+    /**
+     * 3) 校正后需重建 fullNumberKey，保持父子连贯。
+     */
     private static void rebuildFullKeys(Node node, String parentKey) {
         if (node.level == 0) {
             node.fullNumberKey = "";
@@ -443,7 +454,9 @@ public static Node parseWithReference(List<String> lines, Map<String,String> num
         }
     }
 
-    /** 工具：判断行是否能匹配任一层 PATTERN（即真假标题）。*/
+    /**
+     * 工具：判断行是否能匹配任一层 PATTERN（即真假标题）。
+     */
     private static boolean matchesAnyPattern(String line) {
         for (Pattern p : OutlineParser.PATTERNS) {
             if (p.matcher(line).find()) return true;
@@ -452,39 +465,17 @@ public static Node parseWithReference(List<String> lines, Map<String,String> num
     }
 
 
-    /** ===== 高阶 API：传入【模版行】+【报告行】→ 得到已校正的报告树 ===== */
+    /**
+     * ===== 高阶 API：传入【模版行】+【报告行】→ 得到已校正的报告树 =====
+     */
     public static Node parseReportWithTemplate(List<String> templateLines,
                                                List<String> reportLines) {
         Map<String, String> tmplNumMap = buildTemplateNumberMap(templateLines);
         // 先把报告行做“补编号”：凡是没匹配任何 PATTERN、但文字正好出现在模版 key 里，
         // 则强行用模版编号前缀，形如 "1. 批复额度" 或 "（二） 上年度批复情况"
 
-        Node reportRoot = parseWithReference(reportLines,tmplNumMap);
+        Node reportRoot = parse(reportLines, tmplNumMap);
 
-
-
-        // List<String> patchedLines = new ArrayList<>();
-        // for (String ln : reportLines) {//todo 这里的参逻辑得调整
-        //     if (matchesAnyPattern(ln)) {
-        //         patchedLines.add(ln);                 // 本来就有合规编号
-        //     } else {
-        //         String stdNum = tmplNumMap.get(ln.trim());//todo 这里的get用的key不对。但是这里拼接key的话需要带着它的上级。所以这个赋值需要在构建树结构的时候做
-        //         if (stdNum != null) {
-        //             // 判断 stdNum 形态：有 "、"、"（"、"." 来决定拼接空格
-        //             String merged;
-        //             if (stdNum.endsWith("、") || stdNum.endsWith(".")) {
-        //                 merged = stdNum + " " + ln.trim();     // 一、  / 1.
-        //             } else {
-        //                 merged = stdNum + " " + ln.trim();     // （一）
-        //             }
-        //             patchedLines.add(merged);
-        //         } else {
-        //             patchedLines.add(ln);             // 正文或未知行
-        //         }
-        //     }
-        // }
-        // applyTemplateNumbers(reportRoot, tmplNumMap);
-        // rebuildFullKeys(reportRoot, "");
         return reportRoot;
     }
 
@@ -492,9 +483,9 @@ public static Node parseWithReference(List<String> lines, Map<String,String> num
     public static void main(String[] args) throws IOException {
         // ====== 演示：模版 & 报告 双解析 ======
         String templatePath = "/Users/Jenius/Desktop/JavaZero/src/main/java/job/授信-模版.docx";
-        String reportPath   = "/Users/Jenius/Desktop/JavaZero/src/main/java/job/授信-报告.docx";
+        String reportPath = "/Users/Jenius/Desktop/JavaZero/src/main/java/job/授信-报告.docx";
 
-        List<String> tmplLines   = extractWord(templatePath);
+        List<String> tmplLines = extractWord(templatePath);
         List<String> reportLines = extractWord(reportPath);
 
         Node reportRoot = parseReportWithTemplate(tmplLines, reportLines);
