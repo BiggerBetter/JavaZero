@@ -8,7 +8,6 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/job/OutlineParser.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/job/OutlineParser.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/job/授信-报告.docx" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/job/授信-报告.docx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/job/授信-模版.docx" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/job/授信-模版.docx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -392,7 +391,15 @@
       <option name="project" value="LOCAL" />
       <updated>1753436514621</updated>
     </task>
-    <option name="localTasksCounter" value="29" />
+    <task id="LOCAL-00029" summary="代码有问题啊啊啊啊">
+      <option name="closed" value="true" />
+      <created>1753441263167</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1753441263167</updated>
+    </task>
+    <option name="localTasksCounter" value="30" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -400,19 +407,7 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State>
-              <option name="FILTERS">
-                <map>
-                  <entry key="branch">
-                    <value>
-                      <list>
-                        <option value="HEAD" />
-                      </list>
-                    </value>
-                  </entry>
-                </map>
-              </option>
-            </State>
+            <State />
           </value>
         </entry>
       </map>
@@ -464,8 +459,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/main/java/job/OutlineParser.java</url>
-          <line>478</line>
+          <line>502</line>
           <option name="timeStamp" value="49" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/job/OutlineParser.java</url>
+          <line>465</line>
+          <option name="timeStamp" value="59" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

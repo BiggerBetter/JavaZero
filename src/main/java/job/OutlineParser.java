@@ -254,6 +254,63 @@ public class OutlineParser {
         }
         return root;
     }
+public static Node parseWithReference(List<String> lines, Map<String,String> numMap) {
+        Node root = new Node(0, "", "ROOT", "", "", ""); // 虚根
+        Node[] currents = new Node[PATTERNS.size()];   // 按层索引缓存最近节点
+
+        for (String line : lines) {
+            line = line.trim();
+            if (line.isEmpty()) continue;
+
+            int hitLevel = -1;
+            Matcher hitMatcher = null;
+
+            // ① 判定命中层级
+            for (int i = 0; i < PATTERNS.size(); i++) {
+                Matcher m = PATTERNS.get(i).matcher(line);
+                if (m.find()) {
+                    hitLevel = i + 1;          // 层级 = 索引 + 1
+                    hitMatcher = m;
+                    break;
+                }
+            }
+
+            if (hitLevel > 0) {               // 命中了标题
+                // ② 取编号 & 标题文字
+                String numPart = hitMatcher.group(1);
+                String titlePart = hitMatcher.group(2).trim();
+
+                String rawNumber, numberKey;
+                switch (hitLevel) {
+                    case 1:  rawNumber = numPart + "、";          numberKey = rawNumber; break;
+                    case 2:  rawNumber = "（" + numPart + "）";    numberKey = rawNumber; break;
+                    case 3:  rawNumber = numPart + ".";           numberKey = rawNumber; break;
+                    default: rawNumber = "（" + numPart + "）";    numberKey = rawNumber; break; // 四级及以后：沿用括号形式
+                }
+
+                // ③ 生成节点
+                Node parent = (hitLevel == 1) ? root : currents[hitLevel - 2];
+                if (parent == null) parent = root;   // 容错：孤儿标题归根
+                Node node = createNode(hitLevel, rawNumber, titlePart, numberKey, parent);
+                parent.children.add(node);
+
+                // ④ 维护 currents[]
+                currents[hitLevel - 1] = node;
+                for (int i = hitLevel; i < currents.length; i++) currents[i] = null;
+
+            } else {                        // 正文：归到最近的非空 currents
+                Node target = root;
+                for (int i = currents.length - 1; i >= 0; i--) {
+                    if (currents[i] != null) {
+                        target = currents[i];
+                        break;
+                    }
+                }
+                target.contents.add(line);
+            }
+        }
+        return root;
+    }
 
     // 构造节点并补全 key
     private static Node createNode(int level, String rawNumber, String title,
@@ -401,30 +458,33 @@ public class OutlineParser {
         Map<String, String> tmplNumMap = buildTemplateNumberMap(templateLines);
         // 先把报告行做“补编号”：凡是没匹配任何 PATTERN、但文字正好出现在模版 key 里，
         // 则强行用模版编号前缀，形如 "1. 批复额度" 或 "（二） 上年度批复情况"
-        List<String> patchedLines = new ArrayList<>();
-        for (String ln : reportLines) {
-            if (matchesAnyPattern(ln)) {
-                patchedLines.add(ln);                 // 本来就有合规编号
-            } else {
-                String stdNum = tmplNumMap.get(ln.trim());
-                if (stdNum != null) {
-                    // 判断 stdNum 形态：有 "、"、"（"、"." 来决定拼接空格
-                    String merged;
-                    if (stdNum.endsWith("、") || stdNum.endsWith(".")) {
-                        merged = stdNum + " " + ln.trim();     // 一、  / 1.
-                    } else {
-                        merged = stdNum + " " + ln.trim();     // （一）
-                    }
-                    patchedLines.add(merged);
-                } else {
-                    patchedLines.add(ln);             // 正文或未知行
-                }
-            }
-        }
 
-        Node reportRoot = parse(patchedLines);        // 用补全后的行再跑解析
-        applyTemplateNumbers(reportRoot, tmplNumMap);
-        rebuildFullKeys(reportRoot, "");
+        Node reportRoot = parseWithReference(reportLines,tmplNumMap);
+
+
+
+        // List<String> patchedLines = new ArrayList<>();
+        // for (String ln : reportLines) {//todo 这里的参逻辑得调整
+        //     if (matchesAnyPattern(ln)) {
+        //         patchedLines.add(ln);                 // 本来就有合规编号
+        //     } else {
+        //         String stdNum = tmplNumMap.get(ln.trim());//todo 这里的get用的key不对。但是这里拼接key的话需要带着它的上级。所以这个赋值需要在构建树结构的时候做
+        //         if (stdNum != null) {
+        //             // 判断 stdNum 形态：有 "、"、"（"、"." 来决定拼接空格
+        //             String merged;
+        //             if (stdNum.endsWith("、") || stdNum.endsWith(".")) {
+        //                 merged = stdNum + " " + ln.trim();     // 一、  / 1.
+        //             } else {
+        //                 merged = stdNum + " " + ln.trim();     // （一）
+        //             }
+        //             patchedLines.add(merged);
+        //         } else {
+        //             patchedLines.add(ln);             // 正文或未知行
+        //         }
+        //     }
+        // }
+        // applyTemplateNumbers(reportRoot, tmplNumMap);
+        // rebuildFullKeys(reportRoot, "");
         return reportRoot;
     }
 
@@ -451,5 +511,13 @@ public class OutlineParser {
         for (String line : section) System.out.println(line);
     }
 
+    /**
+     * * 外部建模引导内部思考
+     * 外部的建模无法被程序承接
+     *
+     * * 外挂的自我持续管理系统
+     * 系统需要管理很多的进度，采集很多的信息
+     * 采集信息这块可以通过对人的询问得到
+     */
 }
 
